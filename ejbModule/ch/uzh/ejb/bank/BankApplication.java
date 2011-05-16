@@ -4,14 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Remove;
+import javax.ejb.SessionContext;
 import javax.ejb.Stateful;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
 
 import org.jboss.ejb3.annotation.SecurityDomain;
 import org.jboss.security.auth.spi.Util;
@@ -23,9 +35,13 @@ import ch.uzh.ejb.bank.Account.Status;
  */
 @Stateful
 @SecurityDomain("bankapplication")
+@DeclareRoles({"administrator, user"})
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class BankApplication implements BankApplicationRemote, BankApplicationLocal {
 
+	@Resource
+	private SessionContext context;
+	
 	@PersistenceContext(unitName="BankApplication")
 	private EntityManager em;
 	
@@ -192,14 +208,25 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 
 	@Override
 	@PermitAll
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void transfer(Account fromAccount, Account toAccount, double value) {
 		if(value < 0.0) {
-			throw new IllegalArgumentException("Can only transfer positive values.");
+//			throw new IllegalArgumentException("Can only transfer positive values.");
+			context.setRollbackOnly();
+			return;
 		}
 		withdraw(fromAccount, value);
 		deposit(toAccount, value);
 	}
-
+		
+	@Override
+	@PermitAll
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	public void withdrawFailWithRollback(Account account, double value) {
+		withdraw(account, value);
+		context.setRollbackOnly();
+	}
+	
 	@Override
 	@SuppressWarnings("unchecked")
 	@PermitAll

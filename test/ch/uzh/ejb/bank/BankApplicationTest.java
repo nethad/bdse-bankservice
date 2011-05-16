@@ -141,6 +141,29 @@ public class BankApplicationTest {
 		assertEquals(200.0, account2.getBalance(), 0.01);
 	}
 	
+	@Test
+	public void testTransferWithRollback() {
+		Customer customer = createCustomer("Hans", "Lustig");
+		Customer customer2 = createCustomer("Fridolin", "Fisch");
+		Account account = createAccount(customer, 200.0);
+		Account account2 = createAccount(customer2, 0.0);
+		
+		bankApplication.transfer(account, account2, -1.0);
+		account = bankApplication.getAccount(account.getAccountId());
+		account2 = bankApplication.getAccount(account2.getAccountId());
+		assertEquals(200.0, account.getBalance(), 0.01);
+		assertEquals(0.0, account2.getBalance(), 0.01);
+	}
+	
+	@Test
+	public void withdrawFailWithRollback() {
+		Customer customer = createCustomer("Hans", "Lustig");
+		Account account = createAccount(customer, 200.0);
+		
+		bankApplication.withdrawFailWithRollback(account, 100.0);
+		account = bankApplication.getAccount(account.getAccountId());
+		assertEquals(200.0, account.getBalance(), 0.01);
+	}
 
 	static LoginContext loginContext = null;
 	private static Context context;

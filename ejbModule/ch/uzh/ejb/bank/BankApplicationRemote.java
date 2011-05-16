@@ -26,4 +26,7 @@ public interface BankApplicationRemote {
 	
 	public void clearData();
 	public void populateDatabase();
+	
+	// for testing purposes
+	public void withdrawFailWithRollback(Account account, double value);
 }
