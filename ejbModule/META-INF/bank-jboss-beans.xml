@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<deployment xmlns="urn:jboss:bean-deployer:2.0">
+	<!-- <application-policy xmlns="urn:jboss:security-beans:1.0"
+		name="ejb-test">
+		<authentication>
+			<login-module code="org.jboss.security.auth.spi.UsersRolesLoginModule"
+				flag="required">
+				<module-option name="unauthenticatedIdentity">anonymous</module-option>
+				<module-option name="usersProperties">users.properties</module-option>
+				<module-option name="rolesProperties">roles.properties</module-option>
+			</login-module>
+		</authentication>
+	</application-policy> -->
+	<application-policy xmlns="urn:jboss:security-beans:1.0"
+	name="bankapplication">
+	<authentication>
+		<login-module code="org.jboss.security.auth.spi.DatabaseServerLoginModule"
+			flag="required">
+			<module-option name="dsJndiName">java:/DefaultDS</module-option>
+			<module-option name="principalsQuery">
+				select password from customers where userName=?
+	</module-option>
+			<module-option name="rolesQuery">
+				select role,'Roles' from user_roles where userName=?
+	</module-option>
+			<module-option name="hashAlgorithm">MD5</module-option>
+			<module-option name="hashEncoding">base64</module-option>
+		</login-module>
+	</authentication>
+</application-policy>
+</deployment>
