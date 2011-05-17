@@ -25,8 +25,17 @@ public interface BankApplicationRemote {
 	public void transfer(Account fromAccount, Account toAccount, double value);
 	
 	public void clearData();
-	public void populateDatabase();
+//	public void populateDatabase();
+	
+	// stateful stuff
+	public void selectAccount(long id);
+	public long getSelectedAccountId();
+	
+	// session experiment
+	public void test();
 	
 	// for testing purposes
 	public void withdrawFailWithRollback(Account account, double value);
+	public boolean isInRole(String role);
+	
 }

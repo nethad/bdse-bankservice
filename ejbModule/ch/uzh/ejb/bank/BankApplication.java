@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.Remove;
 import javax.ejb.SessionContext;
 import javax.ejb.Stateful;
@@ -15,15 +16,8 @@ import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.NotSupportedException;
-import javax.transaction.RollbackException;
-import javax.transaction.SystemException;
-import javax.transaction.UserTransaction;
 
 import org.jboss.ejb3.annotation.SecurityDomain;
 import org.jboss.security.auth.spi.Util;
@@ -35,15 +29,21 @@ import ch.uzh.ejb.bank.Account.Status;
  */
 @Stateful
 @SecurityDomain("bankapplication")
-@DeclareRoles({"administrator, user"})
+@DeclareRoles({"administrator, clerk, user"})
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class BankApplication implements BankApplicationRemote, BankApplicationLocal {
+
+	private static final String ADMINISTRATOR_ROLE = "administrator";
+	private static final String CLERK_ROLE = "clerk";
+//	private static final String[] CLERK_OR_HIGHER = new String[]{ADMINISTRATOR_ROLE, CLERK_ROLE};
 
 	@Resource
 	private SessionContext context;
 	
 	@PersistenceContext(unitName="BankApplication")
 	private EntityManager em;
+
+	private Account selectedAccount;
 	
     /**
      * Default constructor. 
@@ -63,6 +63,13 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
     
     @Override
     @PermitAll
+    public void test() {
+    	// do nothing
+    	// this method is for testing purposes.
+    }
+    
+    @Override
+    @PermitAll
     public Role createUserRole(String userName, String role) {
     	Role userRole = new Role(userName, role);
     	em.persist(userRole);
@@ -71,8 +78,8 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
     }
     
 	@Override
-//	@RolesAllowed({"administrator"})
-	@PermitAll
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
+//	@PermitAll
 	public Customer createCustomer(String userName, String password, String firstName, String lastName,
 			String address, Customer.Gender gender, String nationality) {
 		
@@ -80,7 +87,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 				address, gender, nationality);
 	}
 
-	@PermitAll
+//	@PermitAll
 	Customer createCustomer_internal(String userName, String password,
 			String firstName, String lastName, String address,
 			Customer.Gender gender, String nationality) {
@@ -127,7 +134,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	}
 	
 	@Override
-	@PermitAll
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
 	public Account createAccount(double balance,
 			Account.Type accountType, float interest, double creditLimit,
 			Customer customer) {
@@ -190,7 +197,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	}
 
 	@Override
-	@PermitAll
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
 	public Account withdraw(Account fromAccount, double value) {
 		if(value < 0.0) {
 			throw new IllegalArgumentException("Can only withdraw positive values. Use deposit.");
@@ -211,9 +218,11 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void transfer(Account fromAccount, Account toAccount, double value) {
 		if(value < 0.0) {
-//			throw new IllegalArgumentException("Can only transfer positive values.");
 			context.setRollbackOnly();
-			return;
+			throw new IllegalArgumentException("Can only transfer positive values.");
+//			return;
+		} else if (!isLoggedInUserAccountOwnerOrClerkOrAdmin(fromAccount)) {
+			throw new RuntimeException("You are not owner of this account.");
 		}
 		withdraw(fromAccount, value);
 		deposit(toAccount, value);
@@ -225,6 +234,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	public void withdrawFailWithRollback(Account account, double value) {
 		withdraw(account, value);
 		context.setRollbackOnly();
+		throw new RuntimeException("This transaction will always fail. (Proof of concept)");
 	}
 	
 	@Override
@@ -239,27 +249,86 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		query = em.createQuery("SELECT object(c) FROM Customer c");
 		List<Customer> customers = query.getResultList();
 		for(Customer customer : customers) {
-			if(!customer.getUserName().equals("admin")) {
+			if(!customer.getUserName().equals("admin")
+					&& !customer.getUserName().equals("clerk")
+					&& !customer.getUserName().equals("user")) {
 				em.remove(customer);
 			}
 		}
 		query = em.createQuery("SELECT object(r) FROM Role r");
 		List<Role> roles = query.getResultList();
 		for(Role role : roles) {
-			if(!role.getUserName().equals("admin")) {
+			if(!role.getUserName().equals("admin")
+					&& !role.getUserName().equals("clerk")
+					&& !role.getUserName().equals("user")) {
 				em.remove(role);
 			}
 		}
 	}
 	
-	@Override
-	@PermitAll
-	public void populateDatabase() {
-		createCustomer_internal("admin", "admin", "", "", "", Customer.Gender.OTHER, "");
-    	createUserRole("admin", "administrator");
-	}
+//	@Override
+//	@PermitAll
+//	public void populateDatabase() {
+//		createCustomer_internal("admin", "admin", "", "", "", Customer.Gender.OTHER, "");
+//    	createUserRole("admin", "administrator");
+//    	
+//		createCustomer_internal("clerk", "clerk", "", "", "", Customer.Gender.OTHER, "");
+//    	createUserRole("clerk", "clerk");
+//    	
+//		createCustomer_internal("user", "user", "", "", "", Customer.Gender.OTHER, "");
+//    	createUserRole("user", "user");
+//	}
 	
 	<T> T getManagedEntity(T entity) {
 		return em.merge(entity);
 	}
+
+	@Override
+	public void selectAccount(long id) {
+		Account account = getAccount(id);
+		if (account == null) {
+			throw new RuntimeException("Account is not existant");
+		} else if (!isLoggedInUserAccountOwnerOrClerkOrAdmin(account)) {
+			throw new RuntimeException("You are not owner of this account.");
+		} else {
+			// everything's OK
+			this.selectedAccount = account;
+		}
+	}
+	
+	private boolean isLoggedInUserAccountOwnerOrClerkOrAdmin(Account account) {
+		if (context.isCallerInRole(ADMINISTRATOR_ROLE) || context.isCallerInRole("clerk")) {
+			return true;
+		}
+		
+		if (account.getCustomer().getUserName().equals(loggedInUserName()) ||
+				loggedInUserIsAdmin()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	private String loggedInUserName() {
+		return context.getCallerPrincipal().getName();
+	}
+	
+	private boolean loggedInUserIsAdmin() {
+		return loggedInUserName().equals("admin");
+	}
+
+	@Override
+	public long getSelectedAccountId() {
+		if (this.selectedAccount == null) {
+			throw new RuntimeException("No account selected.");
+		}
+		return this.selectedAccount.getAccountId();
+	}
+
+	@Override
+	public boolean isInRole(String role) {
+		return context.isCallerInRole(role);
+	}
+
+
 }

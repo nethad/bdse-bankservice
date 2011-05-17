@@ -4,8 +4,10 @@ import static org.junit.Assert.*;
 
 import java.util.Properties;
 
+import javax.ejb.EJBException;
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
@@ -43,8 +45,8 @@ public class BankApplicationTest {
 		context = new InitialContext(props);
 
 		bankApplication = (BankApplicationRemote) context.lookup("BankApplication/remote");
-		bankApplication.populateDatabase();
-		bankApplication.clearData();
+//		bankApplication.populateDatabase();
+//		bankApplication.clearData();
 //        bankApplication = (BankApplicationRemote) context.lookup("BankApplicationRemote");
 	}
 
@@ -60,12 +62,13 @@ public class BankApplicationTest {
 
 	@After
 	public void tearDown() throws Exception {
-		bankApplication.clearData();
+//		bankApplication.clearData();
 		logout();
 	}
 
 	@Test
 	public void testCreateAndGetCustomer() {
+		bankApplication.clearData();
 		Customer customer = createCustomer("Hans", "Lustig");
 		assertNotNull(customer);
 		Customer customer2 = bankApplication.getCustomer(customer.getCustomerId());
@@ -77,8 +80,10 @@ public class BankApplicationTest {
 	}
 
 	@Test
-	public void testCreateAndGetAccount() {
-		System.out.println(loginContext.getSubject());
+	public void testCreateAndGetAccount() throws LoginException {
+//		System.out.println(loginContext.getSubject());
+		
+		assertTrue(bankApplication.isInRole("administrator"));
 		
 		Customer customer = createCustomer("Hans", "Lustig");
 		Account account = createDefaultAccount(customer);
@@ -148,21 +153,44 @@ public class BankApplicationTest {
 		Account account = createAccount(customer, 200.0);
 		Account account2 = createAccount(customer2, 0.0);
 		
-		bankApplication.transfer(account, account2, -1.0);
-		account = bankApplication.getAccount(account.getAccountId());
-		account2 = bankApplication.getAccount(account2.getAccountId());
-		assertEquals(200.0, account.getBalance(), 0.01);
-		assertEquals(0.0, account2.getBalance(), 0.01);
+		try {
+			bankApplication.transfer(account, account2, -1.0);
+			fail("EJBException expected");
+		} catch (EJBException e) {
+			reloadBankApplicationBean();
+			account = bankApplication.getAccount(account.getAccountId());
+			account2 = bankApplication.getAccount(account2.getAccountId());
+			assertEquals(200.0, account.getBalance(), 0.01);
+			assertEquals(0.0, account2.getBalance(), 0.01);
+		}
 	}
 	
 	@Test
 	public void withdrawFailWithRollback() {
 		Customer customer = createCustomer("Hans", "Lustig");
-		Account account = createAccount(customer, 200.0);
-		
-		bankApplication.withdrawFailWithRollback(account, 100.0);
-		account = bankApplication.getAccount(account.getAccountId());
-		assertEquals(200.0, account.getBalance(), 0.01);
+		double initialBalance = 200.0;
+		Account account = createAccount(customer, initialBalance);
+		try {
+			bankApplication.withdrawFailWithRollback(account, 100.0);
+			fail("EJBException expected.");
+		} catch (EJBException e) {
+			reloadBankApplicationBean();
+			account = bankApplication.getAccount(account.getAccountId());
+			assertEquals(initialBalance, account.getBalance(), 0.01);
+		}
+	}
+	
+	@Test
+	public void selectAccount() throws LoginException {
+		Customer userCustomer = getDefaultUserCustomer();
+		Account account = createAccount(userCustomer, 200.0);
+		logout();
+		loginAsUser();
+		bankApplication.selectAccount(account.getAccountId());
+	}
+	
+	private Customer getDefaultUserCustomer() {
+		return bankApplication.getCustomer(102);
 	}
 
 	static LoginContext loginContext = null;
@@ -179,6 +207,41 @@ public class BankApplicationTest {
 	public static void logout()
 	throws LoginException {
 		loginContext.logout();
+	}
+	
+	private void loginAsUser() {
+		String login = "user";
+		try {
+			login(login, login);
+		} catch (LoginException e) {
+			fail("Could not login as "+login+": "+e.getMessage());
+		}
+	}
+	
+	private void loginAsClerk() {
+		String login = "clerk";
+		try {
+			login(login, login);
+		} catch (LoginException e) {
+			fail("Could not login as "+login+": "+e.getMessage());
+		}
+	}
+	
+	private void loginAsAdmin() {
+		String login = "admin";
+		try {
+			login(login, login);
+		} catch (LoginException e) {
+			fail("Could not login as "+login+": "+e.getMessage());
+		}
+	}
+	
+	private void reloadBankApplicationBean() {
+		try {
+			bankApplication = (BankApplicationRemote) context.lookup("BankApplication/remote");
+		} catch (NamingException e) {
+			fail("Could not reload bank application: "+e.getMessage());
+		}
 	}
 
 	Account createDefaultAccount(Customer customer) {
