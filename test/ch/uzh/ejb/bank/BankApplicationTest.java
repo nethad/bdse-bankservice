@@ -12,6 +12,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import ch.uzh.ejb.bank.entities.Account;
+import ch.uzh.ejb.bank.entities.Customer;
+
 /**
  * Generic functional tests the public interface of BankApplication.
  * 

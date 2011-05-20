@@ -1,4 +1,4 @@
-package ch.uzh.ejb.bank;
+package ch.uzh.ejb.bank.entities;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
 
 @Entity
 @Table(name="FIN_TA")

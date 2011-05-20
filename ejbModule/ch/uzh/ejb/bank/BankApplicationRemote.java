@@ -3,11 +3,12 @@ import java.util.List;
 
 import javax.ejb.Remote;
 
+import ch.uzh.ejb.bank.entities.Account;
+import ch.uzh.ejb.bank.entities.Customer;
+
 @Remote
 public interface BankApplicationRemote {
 	public void remove();
-	
-	public Role createUserRole(String userName, String role);
 	
 	public Customer createCustomer(String userName, String password, String firstName, String lastName, String address, 
 			Customer.Gender gender, String nationality);
@@ -30,9 +31,4 @@ public interface BankApplicationRemote {
 	
 	// session experiment
 	public void test();
-	
-	// for testing purposes
-	public void withdrawFailWithRollback(Account account, double value);
-	public boolean isInRole(String role);
-	
 }

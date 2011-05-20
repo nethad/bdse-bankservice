@@ -12,7 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import ch.uzh.ejb.bank.Customer.Gender;
+import ch.uzh.ejb.bank.entities.Customer.Gender;
 
 /**
  * For security to work, the following key value pair must be defined as part of

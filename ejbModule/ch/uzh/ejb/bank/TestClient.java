@@ -9,7 +9,8 @@ import javax.security.auth.login.LoginException;
 
 import org.jboss.security.auth.callback.UsernamePasswordHandler;
 
-import ch.uzh.ejb.bank.Customer.Gender;
+import ch.uzh.ejb.bank.entities.Customer;
+import ch.uzh.ejb.bank.entities.Customer.Gender;
 
 public class TestClient {
 	

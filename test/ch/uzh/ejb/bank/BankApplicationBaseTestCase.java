@@ -14,6 +14,9 @@ import org.jboss.security.auth.callback.UsernamePasswordHandler;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
+import ch.uzh.ejb.bank.entities.Account;
+import ch.uzh.ejb.bank.entities.Customer;
+
 /**
  * Base Test class for all BankApplication Unit Tests.
  * 
@@ -28,7 +31,7 @@ public abstract class BankApplicationBaseTestCase {
 
 	static LoginContext loginContext = null;
 	static Context context;
-	static BankApplicationRemote bankApplication;
+	static BankApplicationTestRemote bankApplication;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -38,7 +41,7 @@ public abstract class BankApplicationBaseTestCase {
 		
 		context = new InitialContext(props);
 
-		bankApplication = (BankApplicationRemote) context.lookup("BankApplication/remote");
+		bankApplication = (BankApplicationTestRemote) context.lookup("BankApplicationTestBean/remote");
 	}
 
 	@AfterClass
@@ -77,7 +80,7 @@ public abstract class BankApplicationBaseTestCase {
 	
 	void reloadBankApplicationBean() {
 		try {
-			bankApplication = (BankApplicationRemote) context.lookup("BankApplication/remote");
+			bankApplication = (BankApplicationTestRemote) context.lookup("BankApplicationTestBean/remote");
 		} catch (NamingException e) {
 			fail("Could not reload bank application: "+e.getMessage());
 		}

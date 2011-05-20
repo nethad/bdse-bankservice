@@ -1,4 +1,4 @@
-package ch.uzh.ejb.bank;
+package ch.uzh.ejb.bank.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,7 +23,12 @@ import javax.persistence.Query;
 import org.jboss.ejb3.annotation.SecurityDomain;
 import org.jboss.security.auth.spi.Util;
 
-import ch.uzh.ejb.bank.Account.Status;
+import ch.uzh.ejb.bank.BankApplicationLocal;
+import ch.uzh.ejb.bank.BankApplicationRemote;
+import ch.uzh.ejb.bank.entities.Account;
+import ch.uzh.ejb.bank.entities.Customer;
+import ch.uzh.ejb.bank.entities.FinancialTransaction;
+import ch.uzh.ejb.bank.entities.Account.Status;
 
 /**
  * Session Bean implementation class BankApplication
@@ -34,17 +39,17 @@ import ch.uzh.ejb.bank.Account.Status;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class BankApplication implements BankApplicationRemote, BankApplicationLocal {
 
-	private static final String ADMINISTRATOR_ROLE = "administrator";
-	private static final String CLERK_ROLE = "clerk";
+	static final String ADMINISTRATOR_ROLE = "administrator";
+	static final String CLERK_ROLE = "clerk";
 //	private static final String[] CLERK_OR_HIGHER = new String[]{ADMINISTRATOR_ROLE, CLERK_ROLE};
 
 	@Resource
-	private SessionContext context;
+	SessionContext context;
 	
 	@PersistenceContext(unitName="BankApplication")
-	private EntityManager em;
+	EntityManager em;
 
-	private Account selectedAccount;
+	Account selectedAccount;
 	
     /**
      * Default constructor. 
@@ -67,15 +72,6 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
     public void test() {
     	// do nothing
     	// this method is for testing purposes.
-    }
-    
-    @Override
-    @PermitAll
-    public Role createUserRole(String userName, String role) {
-    	Role userRole = new Role(userName, role);
-    	em.persist(userRole);
-    	
-    	return userRole;
     }
     
 	@Override
@@ -241,15 +237,6 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		withdraw(fromAccount, value);
 		deposit(toAccount, value);
 	}
-		
-	@Override
-	@PermitAll
-	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public void withdrawFailWithRollback(Account account, double value) {
-		withdraw(account, value);
-		context.setRollbackOnly();
-		throw new RuntimeException("This transaction will always fail. (Proof of concept)");
-	}
 	
 	<T> T getManagedEntity(T entity) {
 		return em.merge(entity);
@@ -268,7 +255,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		}
 	}
 	
-	private boolean isLoggedInUserAccountOwnerOrClerkOrAdmin(Account account) {
+	boolean isLoggedInUserAccountOwnerOrClerkOrAdmin(Account account) {
 		if (context.isCallerInRole(ADMINISTRATOR_ROLE) || context.isCallerInRole("clerk")) {
 			return true;
 		}
@@ -281,11 +268,11 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		}
 	}
 	
-	private String loggedInUserName() {
+	String loggedInUserName() {
 		return context.getCallerPrincipal().getName();
 	}
 	
-	private boolean loggedInUserIsAdmin() {
+	boolean loggedInUserIsAdmin() {
 		return loggedInUserName().equals("admin");
 	}
 
@@ -295,10 +282,5 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 			throw new RuntimeException("No account selected.");
 		}
 		return this.selectedAccount.getAccountId();
-	}
-
-	@Override
-	public boolean isInRole(String role) {
-		return context.isCallerInRole(role);
 	}
 }

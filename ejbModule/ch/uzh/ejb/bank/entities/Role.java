@@ -1,4 +1,4 @@
-package ch.uzh.ejb.bank;
+package ch.uzh.ejb.bank.entities;
 
 import java.io.Serializable;
 
