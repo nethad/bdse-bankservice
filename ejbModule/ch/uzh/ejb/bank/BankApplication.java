@@ -251,48 +251,6 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		throw new RuntimeException("This transaction will always fail. (Proof of concept)");
 	}
 	
-	@Override
-	@SuppressWarnings("unchecked")
-	@PermitAll
-	public void clearData() {
-		Query query = em.createQuery("SELECT object(a) FROM Account a");
-		List<Account> accounts = query.getResultList();
-		for(Account account : accounts) {
-			em.remove(account);
-		}
-		query = em.createQuery("SELECT object(c) FROM Customer c");
-		List<Customer> customers = query.getResultList();
-		for(Customer customer : customers) {
-			if(!customer.getUserName().equals("admin")
-					&& !customer.getUserName().equals("clerk")
-					&& !customer.getUserName().equals("user")) {
-				em.remove(customer);
-			}
-		}
-		query = em.createQuery("SELECT object(r) FROM Role r");
-		List<Role> roles = query.getResultList();
-		for(Role role : roles) {
-			if(!role.getUserName().equals("admin")
-					&& !role.getUserName().equals("clerk")
-					&& !role.getUserName().equals("user")) {
-				em.remove(role);
-			}
-		}
-	}
-	
-//	@Override
-//	@PermitAll
-//	public void populateDatabase() {
-//		createCustomer_internal("admin", "admin", "", "", "", Customer.Gender.OTHER, "");
-//    	createUserRole("admin", "administrator");
-//    	
-//		createCustomer_internal("clerk", "clerk", "", "", "", Customer.Gender.OTHER, "");
-//    	createUserRole("clerk", "clerk");
-//    	
-//		createCustomer_internal("user", "user", "", "", "", Customer.Gender.OTHER, "");
-//    	createUserRole("user", "user");
-//	}
-	
 	<T> T getManagedEntity(T entity) {
 		return em.merge(entity);
 	}
@@ -343,6 +301,4 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	public boolean isInRole(String role) {
 		return context.isCallerInRole(role);
 	}
-
-
 }

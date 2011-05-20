@@ -2,58 +2,26 @@ package ch.uzh.ejb.bank;
 
 import static org.junit.Assert.*;
 
-import java.util.Properties;
+import java.util.HashSet;
+import java.util.List;
 
 import javax.ejb.EJBException;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.security.auth.callback.UsernamePasswordHandler;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
+ * Generic functional tests the public interface of BankApplication.
+ * 
  * For security to work, the following key value pair must be defined as part of
  * the VM arguments: -Djava.security.auth.login.config=etc/login.config
  * 
  * @author daniel
  *
  */
-public class BankApplicationTest {
-	
-	static BankApplicationRemote bankApplication;
-
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-//		Properties p = new Properties();
-//        p.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.openejb.client.LocalInitialContextFactory");
-//        p.put("test-db", "new://Resource?type=DataSource");
-//        p.put("test-db.JdbcDriver", "org.hsqldb.jdbcDriver");
-//        p.put("test-db.JdbcUrl", "jdbc:hsqldb:mem:testdb");
-//        p.put("test-db.JdbcUrl.openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=true)");
-
-		Properties props = new Properties();
-		props.put("java.naming.factory.initial", "org.jnp.interfaces.NamingContextFactory");
-		props.put("java.naming.provider.url", "localhost:1099");
-		
-		context = new InitialContext(props);
-
-		bankApplication = (BankApplicationRemote) context.lookup("BankApplication/remote");
-//		bankApplication.populateDatabase();
-//		bankApplication.clearData();
-//        bankApplication = (BankApplicationRemote) context.lookup("BankApplicationRemote");
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		bankApplication.remove();
-	}
+public class BankApplicationTest extends BankApplicationBaseTestCase {
 
 	@Before
 	public void setUp() throws Exception {
@@ -62,27 +30,26 @@ public class BankApplicationTest {
 
 	@After
 	public void tearDown() throws Exception {
-//		bankApplication.clearData();
 		logout();
 	}
-
+	
 	@Test
 	public void testCreateAndGetCustomer() {
-		bankApplication.clearData();
 		Customer customer = createCustomer("Hans", "Lustig");
 		assertNotNull(customer);
 		Customer customer2 = bankApplication.getCustomer(customer.getCustomerId());
 		assertNotNull(customer2);
 		assertEquals(customer.getCustomerId(), customer2.getCustomerId());
-		Customer customer3 = bankApplication.getCustomer(customer.getFirstName(), customer.getLastName()).get(0);
-		assertNotNull(customer3);
-		assertEquals(customer.getCustomerId(), customer3.getCustomerId());
+		List<Customer> customers = bankApplication.getCustomer(customer.getFirstName(), customer.getLastName());
+		HashSet<Long> ids = new HashSet<Long>();
+		for(Customer c: customers) {
+			ids.add(c.getCustomerId());
+		}
+		assertTrue(ids.contains(customer.getCustomerId()));
 	}
 
 	@Test
 	public void testCreateAndGetAccount() throws LoginException {
-//		System.out.println(loginContext.getSubject());
-		
 		assertTrue(bankApplication.isInRole("administrator"));
 		
 		Customer customer = createCustomer("Hans", "Lustig");
@@ -187,75 +154,5 @@ public class BankApplicationTest {
 		logout();
 		loginAsUser();
 		bankApplication.selectAccount(account.getAccountId());
-	}
-	
-	private Customer getDefaultUserCustomer() {
-		return bankApplication.getCustomer(102);
-	}
-
-	static LoginContext loginContext = null;
-	private static Context context;
-
-	public static void login(String username, String password)
-	throws LoginException {
-		UsernamePasswordHandler handler =
-			new UsernamePasswordHandler(username, password.toCharArray());
-		loginContext = new LoginContext("ba", handler);
-		loginContext.login();
-	}
-	
-	public static void logout()
-	throws LoginException {
-		loginContext.logout();
-	}
-	
-	private void loginAsUser() {
-		String login = "user";
-		try {
-			login(login, login);
-		} catch (LoginException e) {
-			fail("Could not login as "+login+": "+e.getMessage());
-		}
-	}
-	
-	private void loginAsClerk() {
-		String login = "clerk";
-		try {
-			login(login, login);
-		} catch (LoginException e) {
-			fail("Could not login as "+login+": "+e.getMessage());
-		}
-	}
-	
-	private void loginAsAdmin() {
-		String login = "admin";
-		try {
-			login(login, login);
-		} catch (LoginException e) {
-			fail("Could not login as "+login+": "+e.getMessage());
-		}
-	}
-	
-	private void reloadBankApplicationBean() {
-		try {
-			bankApplication = (BankApplicationRemote) context.lookup("BankApplication/remote");
-		} catch (NamingException e) {
-			fail("Could not reload bank application: "+e.getMessage());
-		}
-	}
-
-	Account createDefaultAccount(Customer customer) {
-		return createAccount(customer, 0.0);
-	}
-	
-	Account createAccount(Customer customer, double balance) {
-		Account account = bankApplication.createAccount(balance, Account.Type.PRIVATE_DEBIT, 1.25f, -1000.0, customer);
-		return account;
-	}
-
-	Customer createCustomer(String firstName, String lastName) {
-		Customer customer = bankApplication.createCustomer(firstName, "1111", firstName, lastName, "Lustiggasse 5, " +
-				"9999 Lustigburg", Customer.Gender.MALE, "CH");
-		return customer;
 	}
 }

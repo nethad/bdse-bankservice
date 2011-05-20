@@ -24,9 +24,6 @@ public interface BankApplicationRemote {
 	public Account withdraw(Account fromAccount, double value);
 	public void transfer(Account fromAccount, Account toAccount, double value);
 	
-	public void clearData();
-//	public void populateDatabase();
-	
 	// stateful stuff
 	public void selectAccount(long id);
 	public long getSelectedAccountId();
