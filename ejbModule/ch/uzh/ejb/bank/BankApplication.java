@@ -1,6 +1,7 @@
 package ch.uzh.ejb.bank;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -83,14 +84,6 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	public Customer createCustomer(String userName, String password, String firstName, String lastName,
 			String address, Customer.Gender gender, String nationality) {
 		
-		return createCustomer_internal(userName, password, firstName, lastName,
-				address, gender, nationality);
-	}
-
-//	@PermitAll
-	Customer createCustomer_internal(String userName, String password,
-			String firstName, String lastName, String address,
-			Customer.Gender gender, String nationality) {
 		password = Util.createPasswordHash("MD5", Util.BASE64_ENCODING, null, null, password);
 		
 		Customer customer = new Customer(userName, password, firstName, lastName, address, gender, nationality);
@@ -140,6 +133,8 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 			Customer customer) {
 		Account account = new Account(balance, accountType, interest, creditLimit, customer);
 		em.persist(account);
+		FinancialTransaction fta = new FinancialTransaction(account, new Date(), 0.0, "Account created");
+		em.persist(fta);
 		
 		return account;
 	}
@@ -180,7 +175,22 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	@Override
 	@PermitAll
 	public void setAccountStatus(Account account, Status status) {
+		FinancialTransaction fta = null;
+		switch(status) {
+		case CLOSED: {
+			fta = new FinancialTransaction(account, new Date(), 0.0, "Account closed");
+			break;
+		}
+		case OPEN: {
+			fta = new FinancialTransaction(account, new Date(), 0.0, "Account opened");
+			break;
+		}
+		default: {
+			throw new IllegalArgumentException("Unknown status: " + status);
+		}
+		}
 		getManagedEntity(account).setAccountStatus(status);
+		em.persist(fta);
 	}
 
 	@Override
@@ -192,6 +202,8 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		toAccount = getAccount(toAccount.getAccountId());
 		toAccount.setBalance(toAccount.getBalance() + value);
 		em.merge(toAccount);
+		FinancialTransaction fta = new FinancialTransaction(toAccount, new Date(), value, "ammount deposited");
+		em.persist(fta);
 		
 		return toAccount;
 	}
@@ -209,6 +221,8 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		}
 		fromAccount.setBalance(newValue);
 		em.merge(fromAccount);
+		FinancialTransaction fta = new FinancialTransaction(fromAccount, new Date(), value, "ammount withdrawn");
+		em.persist(fta);
 		
 		return fromAccount;
 	}
