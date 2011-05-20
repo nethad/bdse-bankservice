@@ -26,8 +26,11 @@ public interface BankApplicationRemote {
 	public Account withdraw(Account fromAccount, double value);
 	public void transfer(Account fromAccount, Account toAccount, double value);
 	
-	//account history
 	public String getAccountHistory(Account account, Date from, Date to);
+	
+	public double getTotalBalance(Customer customer);
+	public double getIncome(Customer customer, Date from, Date to);
+	public double getNetChange(Customer customer, Date from, Date to);
 	
 	// stateful stuff
 	public void selectAccount(long id);

@@ -2,6 +2,7 @@ package ch.uzh.ejb.bank;
 
 import static org.junit.Assert.*;
 
+import java.util.Date;
 import java.util.Properties;
 
 import javax.naming.Context;
@@ -66,12 +67,11 @@ public abstract class BankApplicationBaseTestCase {
 
 	/**
 	 * Create a customer with given first and last name. 
-	 * The user name will be the first name and the password '1111'.
+	 * The user name will the current timestamp and the password '1111'.
 	 */
 	Customer createCustomer(String firstName, String lastName) {
-		Customer customer = bankApplication.createCustomer(firstName, "1111", firstName, lastName, "Lustiggasse 5, " +
-				"9999 Lustigburg", Customer.Gender.MALE, "CH");
-		return customer;
+		return bankApplication.createCustomer(Long.toHexString((new Date()).getTime()), "1111", 
+				firstName, lastName, "Lustiggasse 5, 9999 Lustigburg", Customer.Gender.MALE, "CH");
 	}
 	
 	Customer getDefaultUserCustomer() {

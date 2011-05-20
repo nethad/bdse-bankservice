@@ -20,7 +20,9 @@ import javax.persistence.Table;
 	@NamedQuery(name="FIN_TA.findById",
 		query="SELECT DISTINCT OBJECT(f) FROM FinancialTransaction f WHERE f.transactionId=:id"),
 	@NamedQuery(name="FIN_TA.findByAccount",
-		query="SELECT OBJECT(f) FROM FinancialTransaction f WHERE f.account=:account")
+		query="SELECT OBJECT(f) FROM FinancialTransaction f WHERE f.account=:account"),
+	@NamedQuery(name="FIN_TA.findByAccountAndDescription",
+			query="SELECT OBJECT(f) FROM FinancialTransaction f WHERE f.account=:account AND f.description=:description")
 })
 public class FinancialTransaction implements Serializable {
 	private static final long serialVersionUID = 9156961808314737011L;

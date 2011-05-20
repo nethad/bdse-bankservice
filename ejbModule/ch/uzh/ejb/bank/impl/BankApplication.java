@@ -1,7 +1,6 @@
 package ch.uzh.ejb.bank.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -300,7 +299,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	public String getAccountHistory(Account account, Date from, Date to) {
 		StringBuilder sb = new StringBuilder();
 		
-		if (!isLoggedInUserAccountOwnerOrClerkOrAdmin(account)) {
+		if(!isLoggedInUserAccountOwnerOrClerkOrAdmin(account)) {
 			throw new RuntimeException("You are not owner of this account.");
 		}
 		
@@ -308,29 +307,93 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		if(account != null) {
 			Query q = em.createNamedQuery("FIN_TA.findByAccount");
 			q.setParameter("account", account);
-			try {
-				transactions = q.getResultList();
-				if(transactions.size() > 0) {
-					sb.append(AccountHistoryUtil.HISTORY_HEADER);
+			transactions = q.getResultList();
+			if(transactions.size() > 0) {
+				sb.append(AccountHistoryUtil.HISTORY_HEADER);
+				sb.append('\n');
+				sb.append(AccountHistoryUtil.SEPERATOR);
+				for(FinancialTransaction transaction : 
+						AccountHistoryUtil.filterTransactionsByTimeRange(transactions, from, to)) {
+					
 					sb.append('\n');
-					sb.append(AccountHistoryUtil.SEPERATOR);
-					for(FinancialTransaction transaction : transactions) {
-						sb.append('\n');
-						String description = transaction.getDescription();
-						sb.append(description);
-						if(description.equals(AccountHistoryUtil.HISTORY_WITHDRAWAL) || 
-								description.equals(AccountHistoryUtil.HISTORY_DEPOSIT)) {
-							sb.append(transaction.getAmount());
-						}
+					String description = transaction.getDescription();
+					sb.append(description);
+					if(description.equals(AccountHistoryUtil.HISTORY_WITHDRAWAL) || 
+							description.equals(AccountHistoryUtil.HISTORY_DEPOSIT)) {
+						sb.append(transaction.getAmount());
 					}
 				}
-			} catch(Exception ex) {
-				transactions = Collections.emptyList();
 			}
 		} else {
 			throw new IllegalArgumentException("Account can not be null.");
 		}
 		
 		return sb.toString();
+	}
+
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
+	public double getTotalBalance(Customer customer) {
+		List<Account> accounts = getAccounts(customer);
+		double balance = 0;
+		for(Account account : accounts) {
+			if(!isLoggedInUserAccountOwnerOrClerkOrAdmin(account)) {
+				throw new RuntimeException("You are not owner of this account.");
+			}
+			balance += account.getBalance();
+		}
+		
+		return balance;
+	}
+	
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
+	public double getIncome(Customer customer, Date from, Date to) {
+		List<Account> accounts = getAccounts(customer);
+		double income = 0;
+		for(Account account : accounts) {
+			if(!isLoggedInUserAccountOwnerOrClerkOrAdmin(account)) {
+				throw new RuntimeException("You are not owner of this account.");
+			}
+			income += cummulateTransactionsType(account, from, to,
+					AccountHistoryUtil.HISTORY_DEPOSIT);
+		}
+		
+		return income;
+	}
+
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
+	public double getNetChange(Customer customer, Date from, Date to) {
+		List<Account> accounts = getAccounts(customer);
+		double netChange = 0;
+		for(Account account : accounts) {
+			if(!isLoggedInUserAccountOwnerOrClerkOrAdmin(account)) {
+				throw new RuntimeException("You are not owner of this account.");
+			}
+			double income = cummulateTransactionsType(account, from, to, 
+					AccountHistoryUtil.HISTORY_DEPOSIT);
+			double expenses = cummulateTransactionsType(account, from, to, 
+					AccountHistoryUtil.HISTORY_WITHDRAWAL);
+			
+			netChange += income - expenses;
+		}
+		
+		return netChange;
+	}
+	
+	@SuppressWarnings("unchecked")
+	double cummulateTransactionsType(Account account, Date from, Date to, String type) {
+		double sum = 0;
+		Query q = em.createNamedQuery("FIN_TA.findByAccountAndDescription");
+		q.setParameter("account", account);
+		q.setParameter("description", type);
+		List<FinancialTransaction> transactions = q.getResultList();
+		
+		for(FinancialTransaction ta : 
+			AccountHistoryUtil.filterTransactionsByTimeRange(transactions, from, to)) {
+			sum += ta.getAmount();
+		}
+		return sum;
 	}
 }
