@@ -2,6 +2,7 @@ package ch.uzh.ejb.bank;
 
 import static org.junit.Assert.*;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import org.junit.Test;
 
 import ch.uzh.ejb.bank.entities.Account;
 import ch.uzh.ejb.bank.entities.Customer;
+import ch.uzh.ejb.bank.impl.utils.AccountHistoryUtil;
 
 /**
  * Generic functional tests the public interface of BankApplication.
@@ -157,5 +159,53 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 		logout();
 		loginAsUser();
 		bankApplication.selectAccount(account.getAccountId());
+	}
+	
+	@Test
+	public void accountHistory() throws LoginException {
+		
+		Date from = new Date();
+		
+		Customer userCustomer = getDefaultUserCustomer();
+		Account account = createAccount(userCustomer, 200.0);
+		Account account2 = createAccount(createCustomer("Al", "Capone"), 1000000000.0);
+		bankApplication.setAccountStatus(account, Account.Status.OPEN);
+		logout();
+		loginAsUser();
+		bankApplication.deposit(account, 10000.0);
+		bankApplication.transfer(account, account2, 245.65);
+		bankApplication.transfer(account, account2, 10.95);
+		bankApplication.transfer(account, account2, 1.20);
+		logout();
+		loginAsAdmin();
+		bankApplication.setAccountStatus(account, Account.Status.CLOSED);
+		logout();
+		loginAsUser();
+		Date to = new Date();
+		String history = bankApplication.getAccountHistory(account, from, to);
+		
+		StringBuilder expected = new StringBuilder(AccountHistoryUtil.HISTORY_HEADER);
+		expected.append('\n');
+		expected.append(AccountHistoryUtil.SEPERATOR);
+		expected.append('\n');
+		expected.append(AccountHistoryUtil.HISTORY_CREATED);
+		expected.append('\n');
+		expected.append(AccountHistoryUtil.HISTORY_OPENED);
+		expected.append('\n');
+		expected.append(AccountHistoryUtil.HISTORY_DEPOSIT);
+		expected.append("10000.0");
+		expected.append('\n');
+		expected.append(AccountHistoryUtil.HISTORY_WITHDRAWAL);
+		expected.append("245.65");
+		expected.append('\n');
+		expected.append(AccountHistoryUtil.HISTORY_WITHDRAWAL);
+		expected.append("10.95");
+		expected.append('\n');
+		expected.append(AccountHistoryUtil.HISTORY_WITHDRAWAL);
+		expected.append("1.2");
+		expected.append('\n');
+		expected.append(AccountHistoryUtil.HISTORY_CLOSED);
+		
+		assertEquals(expected.toString(), history);
 	}
 }

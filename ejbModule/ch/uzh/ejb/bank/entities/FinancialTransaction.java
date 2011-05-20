@@ -9,11 +9,19 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 
 @Entity
 @Table(name="FIN_TA")
+@NamedQueries({
+	@NamedQuery(name="FIN_TA.findById",
+		query="SELECT DISTINCT OBJECT(f) FROM FinancialTransaction f WHERE f.transactionId=:id"),
+	@NamedQuery(name="FIN_TA.findByAccount",
+		query="SELECT OBJECT(f) FROM FinancialTransaction f WHERE f.account=:account")
+})
 public class FinancialTransaction implements Serializable {
 	private static final long serialVersionUID = 9156961808314737011L;
 	

@@ -1,6 +1,7 @@
 package ch.uzh.ejb.bank.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import ch.uzh.ejb.bank.entities.Account;
 import ch.uzh.ejb.bank.entities.Customer;
 import ch.uzh.ejb.bank.entities.FinancialTransaction;
 import ch.uzh.ejb.bank.entities.Account.Status;
+import ch.uzh.ejb.bank.impl.utils.AccountHistoryUtil;
 
 /**
  * Session Bean implementation class BankApplication
@@ -41,6 +43,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 
 	static final String ADMINISTRATOR_ROLE = "administrator";
 	static final String CLERK_ROLE = "clerk";
+	static final String USER_ROLE = "user";
 //	private static final String[] CLERK_OR_HIGHER = new String[]{ADMINISTRATOR_ROLE, CLERK_ROLE};
 
 	@Resource
@@ -129,7 +132,8 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 			Customer customer) {
 		Account account = new Account(balance, accountType, interest, creditLimit, customer);
 		em.persist(account);
-		FinancialTransaction fta = new FinancialTransaction(account, new Date(), 0.0, "Account created");
+		FinancialTransaction fta = new FinancialTransaction(account, new Date(), 0.0, 
+				AccountHistoryUtil.HISTORY_CREATED);
 		em.persist(fta);
 		
 		return account;
@@ -174,11 +178,13 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		FinancialTransaction fta = null;
 		switch(status) {
 		case CLOSED: {
-			fta = new FinancialTransaction(account, new Date(), 0.0, "Account closed");
+			fta = new FinancialTransaction(account, new Date(), 0.0, 
+					AccountHistoryUtil.HISTORY_CLOSED);
 			break;
 		}
 		case OPEN: {
-			fta = new FinancialTransaction(account, new Date(), 0.0, "Account opened");
+			fta = new FinancialTransaction(account, new Date(), 0.0, 
+					AccountHistoryUtil.HISTORY_OPENED);
 			break;
 		}
 		default: {
@@ -198,7 +204,9 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		toAccount = getAccount(toAccount.getAccountId());
 		toAccount.setBalance(toAccount.getBalance() + value);
 		em.merge(toAccount);
-		FinancialTransaction fta = new FinancialTransaction(toAccount, new Date(), value, "ammount deposited");
+		FinancialTransaction fta = 
+			new FinancialTransaction(toAccount, new Date(), value, 
+					AccountHistoryUtil.HISTORY_DEPOSIT);
 		em.persist(fta);
 		
 		return toAccount;
@@ -217,7 +225,9 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		}
 		fromAccount.setBalance(newValue);
 		em.merge(fromAccount);
-		FinancialTransaction fta = new FinancialTransaction(fromAccount, new Date(), value, "ammount withdrawn");
+		FinancialTransaction fta = 
+			new FinancialTransaction(fromAccount, new Date(), value, 
+					AccountHistoryUtil.HISTORY_WITHDRAWAL);
 		em.persist(fta);
 		
 		return fromAccount;
@@ -282,5 +292,45 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 			throw new RuntimeException("No account selected.");
 		}
 		return this.selectedAccount.getAccountId();
+	}
+
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
+	@SuppressWarnings("unchecked")
+	public String getAccountHistory(Account account, Date from, Date to) {
+		StringBuilder sb = new StringBuilder();
+		
+		if (!isLoggedInUserAccountOwnerOrClerkOrAdmin(account)) {
+			throw new RuntimeException("You are not owner of this account.");
+		}
+		
+		List<FinancialTransaction> transactions = null;
+		if(account != null) {
+			Query q = em.createNamedQuery("FIN_TA.findByAccount");
+			q.setParameter("account", account);
+			try {
+				transactions = q.getResultList();
+				if(transactions.size() > 0) {
+					sb.append(AccountHistoryUtil.HISTORY_HEADER);
+					sb.append('\n');
+					sb.append(AccountHistoryUtil.SEPERATOR);
+					for(FinancialTransaction transaction : transactions) {
+						sb.append('\n');
+						String description = transaction.getDescription();
+						sb.append(description);
+						if(description.equals(AccountHistoryUtil.HISTORY_WITHDRAWAL) || 
+								description.equals(AccountHistoryUtil.HISTORY_DEPOSIT)) {
+							sb.append(transaction.getAmount());
+						}
+					}
+				}
+			} catch(Exception ex) {
+				transactions = Collections.emptyList();
+			}
+		} else {
+			throw new IllegalArgumentException("Account can not be null.");
+		}
+		
+		return sb.toString();
 	}
 }

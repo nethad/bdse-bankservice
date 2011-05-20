@@ -1,4 +1,5 @@
 package ch.uzh.ejb.bank;
+import java.util.Date;
 import java.util.List;
 
 import javax.ejb.Remote;
@@ -24,6 +25,9 @@ public interface BankApplicationRemote {
 	public Account deposit(Account toAccount, double value);
 	public Account withdraw(Account fromAccount, double value);
 	public void transfer(Account fromAccount, Account toAccount, double value);
+	
+	//account history
+	public String getAccountHistory(Account account, Date from, Date to);
 	
 	// stateful stuff
 	public void selectAccount(long id);
