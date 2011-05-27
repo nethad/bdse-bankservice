@@ -177,6 +177,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 
 	@Override
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public void setAccountStatus(Account account, Status status) {
 		
 		if (!isLoggedInUserAccountOwnerOrClerkOrAdmin(account)) {
@@ -205,6 +206,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 
 	@Override
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public Account deposit(Account toAccount, double value) {
 		if(value < 0.0) {
 			throw new IllegalArgumentException("Can only deposit positive values. Use withdraw.");
@@ -222,6 +224,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 
 	@Override
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public Account withdraw(Account fromAccount, double value) {
 		if(value < 0.0) {
 			throw new IllegalArgumentException("Can only withdraw positive values. Use deposit.");
@@ -242,14 +245,12 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	}
 
 	@Override
-//	@PermitAll
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public void transfer(Account fromAccount, Account toAccount, double value) {
 		if(value < 0.0) {
 			context.setRollbackOnly();
 			throw new IllegalArgumentException("Can only transfer positive values.");
-//			return;
 		} else if (!isLoggedInUserAccountOwnerOrClerkOrAdmin(fromAccount)) {
 			throw new RuntimeException("You are not owner of this account.");
 		}
