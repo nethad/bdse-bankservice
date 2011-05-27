@@ -125,15 +125,19 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	}
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
 	public Account createAccount(double balance,
 			Account.Type accountType, float interest, double creditLimit,
 			Customer customer) {
-		Account account = new Account(balance, accountType, interest, creditLimit, customer);
+		Account account = new Account(0.0, accountType, interest, creditLimit, customer);
 		em.persist(account);
 		FinancialTransaction fta = new FinancialTransaction(account, new Date(), 0.0, 
 				AccountHistoryUtil.HISTORY_CREATED);
 		em.persist(fta);
+		
+		// Account is generated with zero balance, this is the initial deposit.
+		deposit(account, balance);
 		
 		return account;
 	}
