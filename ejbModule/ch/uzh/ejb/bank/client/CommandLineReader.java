@@ -93,6 +93,8 @@ public class CommandLineReader {
 		try {
 			if (firstToken.equals("login")) {
 				new LoginCommandHandler(this, tokenizer).execute();
+			} else if (firstToken.equals("create_customer")) {
+				new CreateCustomerCommandHandler(this, tokenizer).execute();
 			} else {
 				System.err.println("[ERROR] Unknown command: "+firstToken);
 			}
