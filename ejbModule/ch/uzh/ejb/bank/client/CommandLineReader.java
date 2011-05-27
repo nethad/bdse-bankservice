@@ -93,9 +93,11 @@ public class CommandLineReader {
 		try {
 			if (firstToken.equals("login")) {
 				new LoginCommandHandler(this, tokenizer).execute();
+			} else {
+				System.err.println("[ERROR] Unknown command: "+firstToken);
 			}
 		} catch (Exception e) {
-			System.err.println("Command unsuccessful: "+e.getMessage());
+			System.err.println("[ERROR] Command unsuccessful: "+e.getMessage());
 		}
 	}
 
