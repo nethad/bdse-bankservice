@@ -208,9 +208,9 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 		Account account = createAccount(userCustomer, 200.0);
 		Account account2 = createAccount(createCustomer("Al", "Capone"), 1000000000.0);
 		bankApplication.setAccountStatus(account, Account.Status.OPEN);
+		bankApplication.deposit(account, 10000.0);
 		logout();
 		loginAsUser();
-		bankApplication.deposit(account, 10000.0);
 		bankApplication.transfer(account, account2, 245.65);
 		bankApplication.transfer(account, account2, 10.95);
 		bankApplication.transfer(account, account2, 1.20);

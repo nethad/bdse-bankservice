@@ -172,8 +172,13 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	}
 
 	@Override
-	@PermitAll
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
 	public void setAccountStatus(Account account, Status status) {
+		
+		if (!isLoggedInUserAccountOwnerOrClerkOrAdmin(account)) {
+			throw new RuntimeException("You are not owner of this account.");
+		}
+		
 		FinancialTransaction fta = null;
 		switch(status) {
 		case CLOSED: {
@@ -195,7 +200,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	}
 
 	@Override
-	@PermitAll
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
 	public Account deposit(Account toAccount, double value) {
 		if(value < 0.0) {
 			throw new IllegalArgumentException("Can only deposit positive values. Use withdraw.");
@@ -233,7 +238,8 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	}
 
 	@Override
-	@PermitAll
+//	@PermitAll
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void transfer(Account fromAccount, Account toAccount, double value) {
 		if(value < 0.0) {
