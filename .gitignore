@@ -4,3 +4,4 @@
 build/
 dist/
 writer.debug
+lib/client
