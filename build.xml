@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="package" name="Create Runnable Jar for Project bdse-bankservice">
+
+	<property name="dist-folder" value="dist" />
+	<property name="jar-name" value="bdse-cli.jar" />
+	<property name="full-jar-path" value="${dist-folder}/${jar-name}" />
+
+
+	<target name="package">
+		<jar destfile="${full-jar-path}" filesetmanifest="mergewithoutmain">
+			<manifest>
+				<attribute name="Main-Class" value="ch.uzh.ejb.bank.client.CommandLineClient" />
+				<attribute name="Class-Path" value="." />
+			</manifest>
+			<fileset dir="build/classes" />
+			<fileset dir="." includes="etc/" />
+			<zipfileset excludes="META-INF/*.SF" src="lib/jars/jline-1.0.jar" />
+		</jar>
+	</target>
+
+</project>
