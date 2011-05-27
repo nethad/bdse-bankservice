@@ -166,7 +166,8 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 		Customer customer = createCustomer("Aaron", "Aal");
 		createAccount(customer, 200.0);
 		assertEquals(200.0, bankApplication.getTotalBalance(customer), 0.1);
-		Account account = createAccount(customer, -1000.0);
+		Account account = createAccount(customer, 0.0);
+		bankApplication.withdraw(account, 1000.0);
 		bankApplication.deposit(account, 500.0);
 		assertEquals(-300.0, bankApplication.getTotalBalance(customer), 0.1);
 	}
@@ -174,29 +175,29 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	@Test
 	public void incomeTest() {
 		Customer customer = createCustomer("Berta", "Braun");
-		Account account = createAccount(customer, 200.0); //TODO: does the initial value count towards the total income?
-		assertEquals(0.0, bankApplication.getIncome(customer, new Date(0), new Date()), 0.1);
+		Account account = createAccount(customer, 200.0);
+		assertEquals(200.0, bankApplication.getIncome(customer, new Date(0), new Date()), 0.1);
 		bankApplication.deposit(account, 1.0);
-		assertEquals(1.0, bankApplication.getIncome(customer, new Date(0), new Date()), 0.1);
+		assertEquals(201.0, bankApplication.getIncome(customer, new Date(0), new Date()), 0.1);
 		bankApplication.withdraw(account, 1.0);
-		assertEquals(1.0, bankApplication.getIncome(customer, new Date(0), new Date()), 0.1);
-		Account account2 = createAccount(customer, 200.0);
+		assertEquals(201.0, bankApplication.getIncome(customer, new Date(0), new Date()), 0.1);
+		Account account2 = createAccount(customer, 0.0);
 		bankApplication.deposit(account2, 1.0);
-		assertEquals(2.0, bankApplication.getIncome(customer, new Date(0), new Date()), 0.1);
+		assertEquals(202.0, bankApplication.getIncome(customer, new Date(0), new Date()), 0.1);
 	}
 	
 	@Test
 	public void netChangeTest() {
 		Customer customer = createCustomer("Charlie", "Chaplin");
-		Account account = createAccount(customer, 200.0); //TODO: does the initial value count towards the net change?
-		assertEquals(0.0, bankApplication.getNetChange(customer, new Date(0), new Date()), 0.1);
+		Account account = createAccount(customer, 200.0);
+		assertEquals(200.0, bankApplication.getNetChange(customer, new Date(0), new Date()), 0.1);
 		bankApplication.deposit(account, 1.0);
-		assertEquals(1.0, bankApplication.getNetChange(customer, new Date(0), new Date()), 0.1);
+		assertEquals(201.0, bankApplication.getNetChange(customer, new Date(0), new Date()), 0.1);
 		bankApplication.withdraw(account, 1.0);
-		assertEquals(0.0, bankApplication.getNetChange(customer, new Date(0), new Date()), 0.1);
-		Account account2 = createAccount(customer, 200.0);
+		assertEquals(200.0, bankApplication.getNetChange(customer, new Date(0), new Date()), 0.1);
+		Account account2 = createAccount(customer, 0.0);
 		bankApplication.withdraw(account2, 1.0);
-		assertEquals(-1.0, bankApplication.getNetChange(customer, new Date(0), new Date()), 0.1);
+		assertEquals(199.0, bankApplication.getNetChange(customer, new Date(0), new Date()), 0.1);
 	}
 	
 	@Test
@@ -227,6 +228,9 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 		expected.append(AccountHistoryUtil.SEPERATOR);
 		expected.append('\n');
 		expected.append(AccountHistoryUtil.HISTORY_CREATED);
+		expected.append('\n');
+		expected.append(AccountHistoryUtil.HISTORY_DEPOSIT);
+		expected.append("200.0");
 		expected.append('\n');
 		expected.append(AccountHistoryUtil.HISTORY_OPENED);
 		expected.append('\n');
