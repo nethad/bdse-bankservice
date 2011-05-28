@@ -14,12 +14,17 @@ public interface BankApplicationRemote {
 	public Customer createCustomer(String userName, String password, String firstName, String lastName, String address, 
 			Customer.Gender gender, String nationality);
 	public List<Customer> getCustomer(String firstName, String lastName);
+	public List<Customer> getAllCustomers();
 	public Customer getCustomer(long id);
 	
+	public void setDefaultCustomer();
+	
 	public Account createAccount(double balance, Account.Type accountType,
-			float interest, double creditLimit, Customer customer);
+			float interest, double creditLimit); // now stateful
 	public Account getAccount(long accountNumber); 
 	public List<Account> getAccounts(Customer customer);
+	public List<Account> getAccounts();
+	public List<Account> getAllAccounts();
 	public void setAccountStatus(Account account, Account.Status status);
 	
 	public Account deposit(Account toAccount, double value);
@@ -35,6 +40,8 @@ public interface BankApplicationRemote {
 	// stateful stuff
 	public void selectAccount(long id);
 	public long getSelectedAccountId();
+	public void selectCustomer(long id);
+	public long getSelectedCustomerId();
 	
 	// session experiment
 	public void test();

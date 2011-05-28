@@ -23,7 +23,9 @@ import javax.persistence.Table;
 	@NamedQuery(name="Account.findById",
 		query="SELECT DISTINCT OBJECT(a) FROM Account a WHERE a.accountId=:id"),
 	@NamedQuery(name="Account.findByCustomer",
-		query="SELECT OBJECT(a) FROM Account a WHERE a.customer=:customer")
+		query="SELECT OBJECT(a) FROM Account a WHERE a.customer=:customer"),
+	@NamedQuery(name="Account.findAllAccounts",
+				query="SELECT OBJECT(a) FROM Account a")
 })
 public class Account implements Serializable {
 

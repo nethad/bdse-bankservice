@@ -17,7 +17,11 @@ import javax.persistence.Table;
 	@NamedQuery(name="Customer.findById",
 		query="SELECT DISTINCT OBJECT(c) FROM Customer c WHERE c.customerId=:id"),
 	@NamedQuery(name="Customer.findByfirstAndLastName",
-		query="SELECT OBJECT(c) FROM Customer c WHERE c.firstName=:firstName AND c.lastName=:lastName")
+		query="SELECT OBJECT(c) FROM Customer c WHERE c.firstName=:firstName AND c.lastName=:lastName"),
+	@NamedQuery(name="Customer.findByUserName",
+		query="SELECT DISTINCT OBJECT(c) FROM Customer c WHERE c.userName=:userName"),
+	@NamedQuery(name="Customer.findAllCustomers",
+		query="SELECT OBJECT(c) FROM Customer c")
 })
 public class Customer implements Serializable {
 	private static final long serialVersionUID = -8392985723325257702L;

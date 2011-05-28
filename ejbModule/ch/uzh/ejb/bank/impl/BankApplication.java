@@ -1,5 +1,6 @@
 package ch.uzh.ejb.bank.impl;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -51,7 +52,8 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	@PersistenceContext(unitName="BankApplication")
 	EntityManager em;
 
-	Account selectedAccount;
+	private Account selectedAccount;
+	private Customer selectedCustomer;
 	
     /**
      * Default constructor. 
@@ -74,6 +76,28 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
     public void test() {
     	// do nothing
     	// this method is for testing purposes.
+    }
+    
+    @SuppressWarnings("unchecked")
+	private Customer getCustomerByUsername(String userName) {
+    	List<Customer> customers = null;
+		if(userName != null) {
+			Query q = em.createNamedQuery("Customer.findByUserName");
+			q.setParameter("userName", userName);
+			try {
+				customers = q.getResultList();
+			} catch(Exception ex) {
+				customers = new ArrayList<Customer>();
+			}
+		}
+		return customers.get(0);
+    }
+    
+    @Override
+    @PermitAll
+    public void setDefaultCustomer() {
+    	String userName = context.getCallerPrincipal().getName();
+    	this.selectedCustomer = getCustomerByUsername(userName);
     }
     
 	@Override
@@ -124,18 +148,29 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		return customer;
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
+	public List<Customer> getAllCustomers() {
+		List<Customer> customers = null;
+		Query q = em.createNamedQuery("Customer.findAllCustomers");
+		try {
+			customers = q.getResultList();	
+		} catch(Exception ex) {
+			customers = new ArrayList<Customer>();
+		}
+		return customers;
+	}
+	
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
 	public Account createAccount(double balance,
-			Account.Type accountType, float interest, double creditLimit,
-			Customer customer) {
+			Account.Type accountType, float interest, double creditLimit) {
 		
-		if (customer == null) {
-			throw new RuntimeException("No customer object given");
-		}
+		checkIfCustomerIsSelected();
 		
-		Account account = new Account(0.0, accountType, interest, creditLimit, customer);
+		Account account = new Account(0.0, accountType, interest, creditLimit, this.selectedCustomer);
 		em.persist(account);
 		FinancialTransaction fta = new FinancialTransaction(account, new Date(), 0.0, 
 				AccountHistoryUtil.HISTORY_CREATED);
@@ -145,6 +180,12 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		deposit(account, balance);
 		
 		return account;
+	}
+
+	private void checkIfCustomerIsSelected() {
+		if (this.selectedCustomer == null) {
+			throw new RuntimeException("No customer object given");
+		}
 	}
 
 	@Override
@@ -177,6 +218,26 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 				accounts = new ArrayList<Account>();
 			}
 		}
+		return accounts;
+	}
+	
+	@Override
+	@PermitAll
+	public List<Account> getAccounts() {
+		checkIfCustomerIsSelected();
+		return getAccounts(selectedCustomer);
+	}
+	
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
+	public List<Account> getAllAccounts() {
+		List<Account> accounts = null;
+			Query q = em.createNamedQuery("Account.findAllAccounts");
+			try {
+				accounts = q.getResultList();
+			} catch(Exception ex) {
+				accounts = new ArrayList<Account>();
+			}
 		return accounts;
 	}
 
@@ -278,6 +339,24 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 			// everything's OK
 			this.selectedAccount = account;
 		}
+	}
+	
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
+	public void selectCustomer(long id) {
+		Customer customer = getCustomer(id);
+		if (customer == null) {
+			throw new RuntimeException("Customer is not existant");
+		} else {
+			// everything's OK
+			this.selectedCustomer = customer;
+		}
+	}
+	
+	@Override
+	public long getSelectedCustomerId() {
+		checkIfCustomerIsSelected();
+		return this.selectedCustomer.getCustomerId();
 	}
 	
 	boolean isLoggedInUserAccountOwnerOrClerkOrAdmin(Account account) {

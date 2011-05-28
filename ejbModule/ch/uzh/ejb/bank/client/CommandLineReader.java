@@ -18,6 +18,14 @@ import org.jboss.security.auth.callback.UsernamePasswordHandler;
 
 import ch.uzh.ejb.bank.BankApplicationRemote;
 import ch.uzh.ejb.bank.BankApplicationTestRemote;
+import ch.uzh.ejb.bank.client.commands.AbstractCommandHandler;
+import ch.uzh.ejb.bank.client.commands.CreateAccountCommandHandler;
+import ch.uzh.ejb.bank.client.commands.CreateCustomerCommandHandler;
+import ch.uzh.ejb.bank.client.commands.GetAccountsCommandHandler;
+import ch.uzh.ejb.bank.client.commands.GetAllAccountsCommandHandler;
+import ch.uzh.ejb.bank.client.commands.GetAllCustomersCommandHandler;
+import ch.uzh.ejb.bank.client.commands.LoginCommandHandler;
+import ch.uzh.ejb.bank.client.commands.SelectCustomerCommandHandler;
 
 import jline.ArgumentCompletor;
 import jline.Completor;
@@ -41,6 +49,10 @@ public class CommandLineReader implements BankApplicationProvider {
 		this.commandHandlers.add(new CreateAccountCommandHandler(this));
 		this.commandHandlers.add(new CreateCustomerCommandHandler(this));
 		this.commandHandlers.add(new LoginCommandHandler(this));
+		this.commandHandlers.add(new GetAccountsCommandHandler(this));
+		this.commandHandlers.add(new GetAllAccountsCommandHandler(this));
+		this.commandHandlers.add(new GetAllCustomersCommandHandler(this));
+		this.commandHandlers.add(new SelectCustomerCommandHandler(this));
 	}
 
 	private void setupWebServiceBinding() throws NamingException {
