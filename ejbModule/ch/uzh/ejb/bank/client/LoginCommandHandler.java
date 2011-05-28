@@ -8,25 +8,21 @@ import javax.security.auth.login.LoginException;
 
 import org.jboss.security.auth.callback.UsernamePasswordHandler;
 
-public class LoginCommandHandler {
+public class LoginCommandHandler extends AbstractCommandHandler {
 
-	private CommandLineReader commandLineReader;
-	private StringTokenizer tokenizer;
-
-	public LoginCommandHandler(CommandLineReader commandLineReader,
-			StringTokenizer tokenizer) {
-		this.commandLineReader = commandLineReader;
-		this.tokenizer = tokenizer;
+	public LoginCommandHandler(BankApplicationProvider bankApplicationProvider) {
+		super(bankApplicationProvider);
 	}
 
-	public void execute() throws Exception {
+	public void execute(StringTokenizer tokenizer) throws Exception {
 		try {
-			String username = this.tokenizer.nextToken();
-			String password = this.tokenizer.nextToken();
+			String username = tokenizer.nextToken();
+			String password = tokenizer.nextToken();
 			
 			login(username, password);
 		} catch (NoSuchElementException e) {
-			throw new Exception("Not enough arguments for login command.");
+			throw new Exception("Not enough arguments for login command.\n"+
+					getUsage());
 		}
 	}
 
@@ -35,6 +31,16 @@ public class LoginCommandHandler {
 				password.toCharArray());
 		LoginContext loginContext = new LoginContext("ba", handler);
 		loginContext.login();
+	}
+
+	@Override
+	public String getUsage() {
+		return getCommand()+" [username] [password]";
+	}
+
+	@Override
+	public String getCommand() {
+		return "login";
 	}
 
 }

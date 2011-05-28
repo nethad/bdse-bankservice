@@ -3,6 +3,7 @@ package ch.uzh.ejb.bank.client;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -15,6 +16,7 @@ import javax.security.auth.login.LoginException;
 
 import org.jboss.security.auth.callback.UsernamePasswordHandler;
 
+import ch.uzh.ejb.bank.BankApplicationRemote;
 import ch.uzh.ejb.bank.BankApplicationTestRemote;
 
 import jline.ArgumentCompletor;
@@ -22,14 +24,23 @@ import jline.Completor;
 import jline.ConsoleReader;
 import jline.SimpleCompletor;
 
-public class CommandLineReader {
+public class CommandLineReader implements BankApplicationProvider {
 
 	private ConsoleReader reader;
-	private BankApplicationTestRemote bankApplication;
+	private BankApplicationRemote bankApplication;
+	private ArrayList<AbstractCommandHandler> commandHandlers;
 
 	public CommandLineReader() throws IOException, NamingException {
 		setupConsoleReader();
 		setupWebServiceBinding();
+		setupCommandHandlers();
+	}
+
+	private void setupCommandHandlers() {
+		this.commandHandlers = new ArrayList<AbstractCommandHandler>();
+		this.commandHandlers.add(new CreateAccountCommandHandler(this));
+		this.commandHandlers.add(new CreateCustomerCommandHandler(this));
+		this.commandHandlers.add(new LoginCommandHandler(this));
 	}
 
 	private void setupWebServiceBinding() throws NamingException {
@@ -89,17 +100,24 @@ public class CommandLineReader {
 	}
 
 	private void dispatchCommand(StringTokenizer tokenizer) {
-		String firstToken = tokenizer.nextToken();
 		try {
-			if (firstToken.equals("login")) {
-				new LoginCommandHandler(this, tokenizer).execute();
-			} else if (firstToken.equals("create_customer")) {
-				new CreateCustomerCommandHandler(this, tokenizer).execute();
-			} else {
-				System.err.println("[ERROR] Unknown command: "+firstToken);
-			}
+			chooseHandler(tokenizer);
 		} catch (Exception e) {
 			System.err.println("[ERROR] Command unsuccessful: "+e.getMessage());
+		}
+	}
+	
+	private void chooseHandler(StringTokenizer tokenizer) throws Exception {
+		String firstToken = tokenizer.nextToken();
+		boolean foundHandler = false;
+		for (AbstractCommandHandler handler : this.commandHandlers) {
+			if (handler.getCommand().equals(firstToken)) {
+				handler.execute(tokenizer);
+				foundHandler = true;
+			}
+		}
+		if (foundHandler == false) {
+			System.err.println("[ERROR] Unknown command: "+firstToken);
 		}
 	}
 
@@ -109,6 +127,14 @@ public class CommandLineReader {
 				password.toCharArray());
 		LoginContext loginContext = new LoginContext("ba", handler);
 		loginContext.login();
+	}
+
+	@Override
+	public BankApplicationRemote getBankApplication() {
+		if (this.bankApplication == null) {
+			throw new RuntimeException("Web service binding not established.");
+		}
+		return this.bankApplication;
 	}
 
 }

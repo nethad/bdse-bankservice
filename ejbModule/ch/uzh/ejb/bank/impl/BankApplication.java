@@ -130,6 +130,11 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	public Account createAccount(double balance,
 			Account.Type accountType, float interest, double creditLimit,
 			Customer customer) {
+		
+		if (customer == null) {
+			throw new RuntimeException("No customer object given");
+		}
+		
 		Account account = new Account(0.0, accountType, interest, creditLimit, customer);
 		em.persist(account);
 		FinancialTransaction fta = new FinancialTransaction(account, new Date(), 0.0, 
