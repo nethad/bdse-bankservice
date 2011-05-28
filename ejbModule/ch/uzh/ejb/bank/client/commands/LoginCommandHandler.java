@@ -17,15 +17,15 @@ public class LoginCommandHandler extends AbstractCommandHandler {
 	}
 
 	public void execute(StringTokenizer tokenizer) throws Exception {
-		try {
+//		try {
 			String username = tokenizer.nextToken();
 			String password = tokenizer.nextToken();
 			
 			login(username, password);
-		} catch (NoSuchElementException e) {
-			throw new Exception("Not enough arguments for login command.\n"+
-					getUsage());
-		}
+//		} catch (NoSuchElementException e) {
+//			throw new Exception("Not enough arguments for login command.\n"+
+//					getUsage());
+//		}
 	}
 
 	public void login(String username, String password) throws LoginException {

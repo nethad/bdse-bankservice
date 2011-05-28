@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -21,6 +22,7 @@ import ch.uzh.ejb.bank.BankApplicationTestRemote;
 import ch.uzh.ejb.bank.client.commands.AbstractCommandHandler;
 import ch.uzh.ejb.bank.client.commands.CreateAccountCommandHandler;
 import ch.uzh.ejb.bank.client.commands.CreateCustomerCommandHandler;
+import ch.uzh.ejb.bank.client.commands.DepositCommandHandler;
 import ch.uzh.ejb.bank.client.commands.GetAccountsCommandHandler;
 import ch.uzh.ejb.bank.client.commands.GetAllAccountsCommandHandler;
 import ch.uzh.ejb.bank.client.commands.GetAllCustomersCommandHandler;
@@ -28,6 +30,8 @@ import ch.uzh.ejb.bank.client.commands.HelpCommandHandler;
 import ch.uzh.ejb.bank.client.commands.LoginCommandHandler;
 import ch.uzh.ejb.bank.client.commands.SelectAccountCommandHandler;
 import ch.uzh.ejb.bank.client.commands.SelectCustomerCommandHandler;
+import ch.uzh.ejb.bank.client.commands.ShowAccountCommandHandler;
+import ch.uzh.ejb.bank.client.commands.ShowCustomerCommandHandler;
 
 import jline.ArgumentCompletor;
 import jline.Completor;
@@ -44,6 +48,7 @@ public class CommandLineReader implements BankApplicationProvider {
 		setupConsoleReader();
 		setupWebServiceBinding();
 		setupCommandHandlers();
+		addCommandsToCompletor();
 	}
 
 	private void setupCommandHandlers() {
@@ -57,6 +62,21 @@ public class CommandLineReader implements BankApplicationProvider {
 		this.commandHandlers.add(new GetAllCustomersCommandHandler(this));
 		this.commandHandlers.add(new SelectCustomerCommandHandler(this));
 		this.commandHandlers.add(new SelectAccountCommandHandler(this));
+		this.commandHandlers.add(new ShowAccountCommandHandler(this));
+		this.commandHandlers.add(new ShowCustomerCommandHandler(this));
+		
+		this.commandHandlers.add(new DepositCommandHandler(this));
+	}
+
+	private void addCommandsToCompletor() {
+		List<Completor> completors = new LinkedList<Completor>();
+		List<String> commands = new ArrayList<String>();
+		for(AbstractCommandHandler handler : this.commandHandlers) {
+			commands.add(handler.getCommand());
+		}
+		completors.add(new SimpleCompletor(
+				commands.toArray(new String[]{})));
+		reader.addCompletor(new ArgumentCompletor(completors));
 	}
 
 	private void setupWebServiceBinding() throws NamingException {
@@ -73,12 +93,6 @@ public class CommandLineReader implements BankApplicationProvider {
 		reader = new ConsoleReader();
 		reader.setBellEnabled(false);
 		reader.setDebug(new PrintWriter(new FileWriter("writer.debug", true)));
-		List<Completor> completors = new LinkedList<Completor>();
-
-		completors
-				.add(new SimpleCompletor(new String[] { "foo", "bar", "baz" }));
-
-		reader.addCompletor(new ArgumentCompletor(completors));
 	}
 
 	public void start() throws IOException {
@@ -128,12 +142,23 @@ public class CommandLineReader implements BankApplicationProvider {
 		boolean foundHandler = false;
 		for (AbstractCommandHandler handler : this.commandHandlers) {
 			if (handler.getCommand().equals(firstToken)) {
-				handler.execute(tokenizer);
+				executeHandler(tokenizer, handler);
 				foundHandler = true;
 			}
 		}
 		if (foundHandler == false) {
 			System.err.println("[ERROR] Unknown command: "+firstToken);
+		}
+	}
+
+	private void executeHandler(StringTokenizer tokenizer,
+			AbstractCommandHandler handler) throws Exception {
+		try {
+			handler.execute(tokenizer);
+		} catch (NoSuchElementException e) {
+			throw new Exception("Not enough arguments for "+
+					handler.getCommand()+" command.\n"+
+					handler.getUsage());
 		}
 	}
 

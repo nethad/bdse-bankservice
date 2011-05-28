@@ -187,6 +187,12 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 			throw new RuntimeException("No customer object given");
 		}
 	}
+	
+	private void checkIfAccountIsSelected() {
+		if (this.selectedAccount == null) {
+			throw new RuntimeException("No account object given");
+		}
+	}
 
 	@Override
 	@PermitAll
@@ -286,6 +292,13 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		em.persist(fta);
 		
 		return toAccount;
+	}
+	
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
+	public Account deposit(double value) {
+		checkIfAccountIsSelected();
+		return deposit(selectedAccount, value);
 	}
 
 	@Override
