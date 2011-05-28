@@ -166,7 +166,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
 	public Account createAccount(double balance,
-			Account.Type accountType, float interest, double creditLimit) {
+			Account.Type accountType, float interest, double creditLimit) throws Exception {
 		
 		checkIfCustomerIsSelected();
 		
@@ -182,15 +182,15 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		return account;
 	}
 
-	private void checkIfCustomerIsSelected() {
+	private void checkIfCustomerIsSelected() throws Exception {
 		if (this.selectedCustomer == null) {
-			throw new RuntimeException("No customer object given");
+			throw new Exception("No customer object given");
 		}
 	}
 	
-	private void checkIfAccountIsSelected() {
+	private void checkIfAccountIsSelected() throws Exception {
 		if (this.selectedAccount == null) {
-			throw new RuntimeException("No account object given");
+			throw new Exception("No account object given");
 		}
 	}
 
@@ -229,7 +229,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	
 	@Override
 	@PermitAll
-	public List<Account> getAccounts() {
+	public List<Account> getAccounts() throws Exception {
 		checkIfCustomerIsSelected();
 		return getAccounts(selectedCustomer);
 	}
@@ -250,10 +250,10 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	@Override
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public void setAccountStatus(Account account, Status status) {
+	public void setAccountStatus(Account account, Status status) throws Exception {
 		
 		if (!isLoggedInUserAccountOwnerOrClerkOrAdmin(account)) {
-			throw new RuntimeException("You are not owner of this account.");
+			throw new Exception("You are not owner of this account.");
 		}
 		
 		FinancialTransaction fta = null;
@@ -296,7 +296,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	
 	@Override
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
-	public Account deposit(double value) {
+	public Account deposit(double value) throws Exception {
 		checkIfAccountIsSelected();
 		return deposit(selectedAccount, value);
 	}
@@ -322,16 +322,23 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		
 		return fromAccount;
 	}
+	
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
+	public Account withdraw(double value) throws Exception {
+		checkIfAccountIsSelected();
+		return withdraw(selectedAccount, value);
+	}
 
 	@Override
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public void transfer(Account fromAccount, Account toAccount, double value) {
+	public void transfer(Account fromAccount, Account toAccount, double value) throws Exception {
 		if(value < 0.0) {
 			context.setRollbackOnly();
 			throw new IllegalArgumentException("Can only transfer positive values.");
 		} else if (!isLoggedInUserAccountOwnerOrClerkOrAdmin(fromAccount)) {
-			throw new RuntimeException("You are not owner of this account.");
+			throw new Exception("You are not owner of this account.");
 		}
 		withdraw(fromAccount, value);
 		deposit(toAccount, value);
@@ -342,12 +349,12 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	}
 
 	@Override
-	public void selectAccount(long id) {
+	public void selectAccount(long id) throws Exception {
 		Account account = getAccount(id);
 		if (account == null) {
-			throw new RuntimeException("Account is not existant");
+			throw new Exception("Account is not existant");
 		} else if (!isLoggedInUserAccountOwnerOrClerkOrAdmin(account)) {
-			throw new RuntimeException("You are not owner of this account.");
+			throw new Exception("You are not owner of this account.");
 		} else {
 			// everything's OK
 			this.selectedAccount = account;
@@ -367,7 +374,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	}
 	
 	@Override
-	public long getSelectedCustomerId() {
+	public long getSelectedCustomerId() throws Exception {
 		checkIfCustomerIsSelected();
 		return this.selectedCustomer.getCustomerId();
 	}
@@ -394,9 +401,9 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	}
 
 	@Override
-	public long getSelectedAccountId() {
+	public long getSelectedAccountId() throws Exception {
 		if (this.selectedAccount == null) {
-			throw new RuntimeException("No account selected.");
+			throw new Exception("No account selected.");
 		}
 		return this.selectedAccount.getAccountId();
 	}
@@ -404,11 +411,11 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	@Override
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
 	@SuppressWarnings("unchecked")
-	public String getAccountHistory(Account account, Date from, Date to) {
+	public String getAccountHistory(Account account, Date from, Date to) throws Exception {
 		StringBuilder sb = new StringBuilder();
 		
 		if(!isLoggedInUserAccountOwnerOrClerkOrAdmin(account)) {
-			throw new RuntimeException("You are not owner of this account.");
+			throw new Exception("You are not owner of this account.");
 		}
 		
 		List<FinancialTransaction> transactions = null;
@@ -441,12 +448,12 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 
 	@Override
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
-	public double getTotalBalance(Customer customer) {
+	public double getTotalBalance(Customer customer) throws Exception {
 		List<Account> accounts = getAccounts(customer);
 		double balance = 0;
 		for(Account account : accounts) {
 			if(!isLoggedInUserAccountOwnerOrClerkOrAdmin(account)) {
-				throw new RuntimeException("You are not owner of this account.");
+				throw new Exception("You are not owner of this account.");
 			}
 			balance += account.getBalance();
 		}
@@ -456,12 +463,12 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	
 	@Override
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
-	public double getIncome(Customer customer, Date from, Date to) {
+	public double getIncome(Customer customer, Date from, Date to) throws Exception {
 		List<Account> accounts = getAccounts(customer);
 		double income = 0;
 		for(Account account : accounts) {
 			if(!isLoggedInUserAccountOwnerOrClerkOrAdmin(account)) {
-				throw new RuntimeException("You are not owner of this account.");
+				throw new Exception("You are not owner of this account.");
 			}
 			income += cummulateTransactionsType(account, from, to,
 					AccountHistoryUtil.HISTORY_DEPOSIT);
@@ -472,12 +479,12 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 
 	@Override
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
-	public double getNetChange(Customer customer, Date from, Date to) {
+	public double getNetChange(Customer customer, Date from, Date to) throws Exception {
 		List<Account> accounts = getAccounts(customer);
 		double netChange = 0;
 		for(Account account : accounts) {
 			if(!isLoggedInUserAccountOwnerOrClerkOrAdmin(account)) {
-				throw new RuntimeException("You are not owner of this account.");
+				throw new Exception("You are not owner of this account.");
 			}
 			double income = cummulateTransactionsType(account, from, to, 
 					AccountHistoryUtil.HISTORY_DEPOSIT);

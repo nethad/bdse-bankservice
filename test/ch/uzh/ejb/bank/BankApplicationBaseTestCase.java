@@ -52,15 +52,17 @@ public abstract class BankApplicationBaseTestCase {
 	
 	/**
 	 * Create an empty account for the supplied customer.
+	 * @throws Exception 
 	 */
-	Account createDefaultAccount(Customer customer) {
+	Account createDefaultAccount(Customer customer) throws Exception {
 		return createAccount(customer, 0.0);
 	}
 	
 	/**
 	 * Create an account with for the specified customer with the specified balance.
+	 * @throws Exception 
 	 */
-	Account createAccount(Customer customer, double balance) {
+	Account createAccount(Customer customer, double balance) throws Exception {
 		bankApplication.selectCustomer(customer.getCustomerId());
 		Account account = bankApplication.createAccount(balance, Account.Type.PRIVATE_DEBIT, 1.25f, -1000.0);
 		return account;

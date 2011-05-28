@@ -3,29 +3,29 @@ package ch.uzh.ejb.bank.client.commands;
 import java.util.StringTokenizer;
 
 import ch.uzh.ejb.bank.client.BankApplicationProvider;
-import ch.uzh.ejb.bank.entities.Account.Type;
 
-public class CreateAccountCommandHandler extends AbstractCommandHandler {
+public class WithdrawCommandHandler extends AbstractCommandHandler {
 
-	public CreateAccountCommandHandler(
+	public WithdrawCommandHandler(
 			BankApplicationProvider bankApplicationProvider) {
 		super(bankApplicationProvider);
 	}
 
+	@Override
 	public void execute(StringTokenizer tokenizer) throws Exception {
-		double balance = Double.parseDouble(tokenizer.nextToken());
-		getBankApplication().createAccount(
-				balance, Type.PRIVAE_CREDIT, 1.25F, -1000.0);
+		double amount = Double.parseDouble(tokenizer.nextToken());
+		getBankApplication().withdraw(amount);
 	}
 
 	@Override
 	public String getUsage() {
-		return getCommand()+" [balance]";
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
 	public String getCommand() {
-		return "create_account";
+		return "withdraw";
 	}
 
 }

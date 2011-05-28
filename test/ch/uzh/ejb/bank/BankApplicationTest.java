@@ -54,7 +54,7 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	}
 
 	@Test
-	public void testCreateAndGetAccount() throws LoginException {
+	public void testCreateAndGetAccount() throws Exception {
 		assertTrue(bankApplication.isInRole("administrator"));
 		
 		Customer customer = createCustomer("Hans", "Lustig");
@@ -71,7 +71,7 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
-	public void testDeposit() {
+	public void testDeposit() throws Exception {
 		Customer customer = createCustomer("Hans", "Lustig");
 		Account account = createDefaultAccount(customer);
 		account = bankApplication.deposit(account, 100.0);
@@ -90,7 +90,7 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
-	public void testWithdraw() {
+	public void testWithdraw() throws Exception {
 		Customer customer = createCustomer("Hans", "Lustig");
 		Account account = createAccount(customer, 200.0);
 		account = bankApplication.withdraw(account, 100.0);
@@ -105,7 +105,7 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
-	public void testTransfer() {
+	public void testTransfer() throws Exception {
 		Customer customer = createCustomer("Hans", "Lustig");
 		Customer customer2 = createCustomer("Fridolin", "Fisch");
 		Account account = createAccount(customer, 200.0);
@@ -119,7 +119,7 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
-	public void testTransferWithRollback() {
+	public void testTransferWithRollback() throws Exception {
 		Customer customer = createCustomer("Hans", "Lustig");
 		Customer customer2 = createCustomer("Fridolin", "Fisch");
 		Account account = createAccount(customer, 200.0);
@@ -138,7 +138,7 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
-	public void withdrawFailWithRollback() {
+	public void withdrawFailWithRollback() throws Exception {
 		Customer customer = createCustomer("Hans", "Lustig");
 		double initialBalance = 200.0;
 		Account account = createAccount(customer, initialBalance);
@@ -153,7 +153,7 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
-	public void selectAccount() throws LoginException {
+	public void selectAccount() throws Exception {
 		Customer userCustomer = getDefaultUserCustomer();
 		Account account = createAccount(userCustomer, 200.0);
 		logout();
@@ -162,7 +162,7 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
-	public void totalBalanceTest() {
+	public void totalBalanceTest() throws Exception {
 		Customer customer = createCustomer("Aaron", "Aal");
 		createAccount(customer, 200.0);
 		assertEquals(200.0, bankApplication.getTotalBalance(customer), 0.1);
@@ -173,7 +173,7 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
-	public void incomeTest() {
+	public void incomeTest() throws Exception {
 		Customer customer = createCustomer("Berta", "Braun");
 		Account account = createAccount(customer, 200.0);
 		assertEquals(200.0, bankApplication.getIncome(customer, new Date(0), new Date()), 0.1);
@@ -187,7 +187,7 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
-	public void netChangeTest() {
+	public void netChangeTest() throws Exception {
 		Customer customer = createCustomer("Charlie", "Chaplin");
 		Account account = createAccount(customer, 200.0);
 		assertEquals(200.0, bankApplication.getNetChange(customer, new Date(0), new Date()), 0.1);
@@ -201,7 +201,7 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
-	public void accountHistoryTest() throws LoginException {
+	public void accountHistoryTest() throws Exception {
 		
 		Date from = new Date();
 		

@@ -22,9 +22,10 @@ public class GetAllCustomersCommandHandler extends AbstractCommandHandler {
 
 	private void printList(List<Customer> customers) {
 		System.out.println("=== Customers ("+customers.size()+")");
-		System.out.println("id\tusername");
+		PrintHelper.printElementsWithTab("id", "username");
 		for (Customer customer : customers) {
-			System.out.println(customer.getCustomerId()+"\t"+
+			PrintHelper.printElementsWithTab(
+					customer.getCustomerId(),
 					customer.getUserName());
 		}
 		System.out.println("===");
@@ -37,7 +38,7 @@ public class GetAllCustomersCommandHandler extends AbstractCommandHandler {
 
 	@Override
 	public String getCommand() {
-		return "get_all_customers";
+		return "all_customers";
 	}
 
 }

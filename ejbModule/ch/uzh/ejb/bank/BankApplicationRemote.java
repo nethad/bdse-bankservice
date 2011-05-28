@@ -20,29 +20,30 @@ public interface BankApplicationRemote {
 	public void setDefaultCustomer(); // should be invoked after login
 	
 	public Account createAccount(double balance, Account.Type accountType,
-			float interest, double creditLimit); // now stateful
+			float interest, double creditLimit) throws Exception; // now stateful
 	public Account getAccount(long accountNumber); 
 	public List<Account> getAccounts(Customer customer);
-	public List<Account> getAccounts(); // stateful
+	public List<Account> getAccounts() throws Exception; // stateful
 	public List<Account> getAllAccounts();
-	public void setAccountStatus(Account account, Account.Status status);
+	public void setAccountStatus(Account account, Account.Status status) throws Exception;
 	
 	public Account deposit(Account toAccount, double value);
-	public Account deposit(double value); // stateful
+	public Account deposit(double value) throws Exception; // stateful
 	public Account withdraw(Account fromAccount, double value);
-	public void transfer(Account fromAccount, Account toAccount, double value);
+	public Account withdraw(double value) throws Exception; // stateful
+	public void transfer(Account fromAccount, Account toAccount, double value) throws Exception;
 	
-	public String getAccountHistory(Account account, Date from, Date to);
+	public String getAccountHistory(Account account, Date from, Date to) throws Exception;
 	
-	public double getTotalBalance(Customer customer);
-	public double getIncome(Customer customer, Date from, Date to);
-	public double getNetChange(Customer customer, Date from, Date to);
+	public double getTotalBalance(Customer customer) throws Exception;
+	public double getIncome(Customer customer, Date from, Date to) throws Exception;
+	public double getNetChange(Customer customer, Date from, Date to) throws Exception;
 	
 	// stateful stuff
-	public void selectAccount(long id);
-	public long getSelectedAccountId();
+	public void selectAccount(long id) throws Exception;
+	public long getSelectedAccountId() throws Exception;
 	public void selectCustomer(long id);
-	public long getSelectedCustomerId();
+	public long getSelectedCustomerId() throws Exception;
 	
 	// session experiment
 	public void test();
