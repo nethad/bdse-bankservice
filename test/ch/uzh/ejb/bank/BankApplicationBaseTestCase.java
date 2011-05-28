@@ -61,6 +61,7 @@ public abstract class BankApplicationBaseTestCase {
 	 * Create an account with for the specified customer with the specified balance.
 	 */
 	Account createAccount(Customer customer, double balance) {
+		bankApplication.selectCustomer(customer.getCustomerId());
 		Account account = bankApplication.createAccount(balance, Account.Type.PRIVATE_DEBIT, 1.25f, -1000.0);
 		return account;
 	}

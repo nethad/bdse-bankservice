@@ -24,7 +24,9 @@ import ch.uzh.ejb.bank.client.commands.CreateCustomerCommandHandler;
 import ch.uzh.ejb.bank.client.commands.GetAccountsCommandHandler;
 import ch.uzh.ejb.bank.client.commands.GetAllAccountsCommandHandler;
 import ch.uzh.ejb.bank.client.commands.GetAllCustomersCommandHandler;
+import ch.uzh.ejb.bank.client.commands.HelpCommandHandler;
 import ch.uzh.ejb.bank.client.commands.LoginCommandHandler;
+import ch.uzh.ejb.bank.client.commands.SelectAccountCommandHandler;
 import ch.uzh.ejb.bank.client.commands.SelectCustomerCommandHandler;
 
 import jline.ArgumentCompletor;
@@ -46,6 +48,7 @@ public class CommandLineReader implements BankApplicationProvider {
 
 	private void setupCommandHandlers() {
 		this.commandHandlers = new ArrayList<AbstractCommandHandler>();
+		this.commandHandlers.add(new HelpCommandHandler(this));
 		this.commandHandlers.add(new CreateAccountCommandHandler(this));
 		this.commandHandlers.add(new CreateCustomerCommandHandler(this));
 		this.commandHandlers.add(new LoginCommandHandler(this));
@@ -53,6 +56,7 @@ public class CommandLineReader implements BankApplicationProvider {
 		this.commandHandlers.add(new GetAllAccountsCommandHandler(this));
 		this.commandHandlers.add(new GetAllCustomersCommandHandler(this));
 		this.commandHandlers.add(new SelectCustomerCommandHandler(this));
+		this.commandHandlers.add(new SelectAccountCommandHandler(this));
 	}
 
 	private void setupWebServiceBinding() throws NamingException {
@@ -147,6 +151,20 @@ public class CommandLineReader implements BankApplicationProvider {
 			throw new RuntimeException("Web service binding not established.");
 		}
 		return this.bankApplication;
+	}
+
+	public void printHelp() {
+		for (AbstractCommandHandler handler : this.commandHandlers) {
+			System.out.println(handler.getUsage());
+		}
+	}
+	
+	public void printHelpFor(String command) {
+		for (AbstractCommandHandler handler : this.commandHandlers) {
+			if (handler.getCommand().equals(command)) {
+				System.out.println(handler.getUsage());				
+			}
+		}
 	}
 
 }

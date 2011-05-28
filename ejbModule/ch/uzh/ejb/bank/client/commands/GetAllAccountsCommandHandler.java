@@ -23,7 +23,7 @@ public class GetAllAccountsCommandHandler extends AbstractCommandHandler {
 		System.out.println("=== Accounts ("+accounts.size()+")");
 		System.out.println("id\tbalance\tcustomer_id");
 		for (Account account : accounts) {
-			System.out.println(account.getBalance()+"\t"+
+			System.out.println(account.getAccountId()+"\t"+
 					account.getBalance()+"\t"+
 					account.getCustomer().getCustomerId());
 		}
