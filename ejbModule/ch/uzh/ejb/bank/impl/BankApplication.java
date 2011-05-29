@@ -1,6 +1,5 @@
 package ch.uzh.ejb.bank.impl;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +29,9 @@ import ch.uzh.ejb.bank.entities.Account;
 import ch.uzh.ejb.bank.entities.Customer;
 import ch.uzh.ejb.bank.entities.FinancialTransaction;
 import ch.uzh.ejb.bank.entities.Account.Status;
+import ch.uzh.ejb.bank.entities.Mortgage;
 import ch.uzh.ejb.bank.impl.utils.AccountHistoryUtil;
+import ch.uzh.ejb.bank.process.MortgageApplication;
 
 /**
  * Session Bean implementation class BankApplication
@@ -236,6 +237,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	
 	@Override
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
+	@SuppressWarnings("unchecked")
 	public List<Account> getAllAccounts() {
 		List<Account> accounts = null;
 			Query q = em.createNamedQuery("Account.findAllAccounts");
@@ -510,5 +512,14 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 			sum += ta.getAmount();
 		}
 		return sum;
+	}
+
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	public void payOutMortgage(MortgageApplication mortgageApplication) throws Exception {
+		double sum = mortgageApplication.getRequiredSum() - mortgageApplication.getAvailableFunds();
+		deposit(sum);
+		em.persist(new Mortgage(mortgageApplication.getCustomer(), sum));
 	}
 }

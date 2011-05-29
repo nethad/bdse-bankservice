@@ -119,4 +119,23 @@ public class Customer implements Serializable {
 	public void setNationality(String nationality) {
 		this.nationality = nationality;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == null) {
+			return false;
+		}
+		
+		if(obj instanceof Customer) {
+			Customer otherCustomer = ((Customer) obj);
+			return (customerId == otherCustomer.customerId);
+		}
+		
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return String.valueOf(customerId).hashCode();
+	}
 }

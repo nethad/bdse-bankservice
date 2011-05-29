@@ -6,6 +6,7 @@ import javax.ejb.Remote;
 
 import ch.uzh.ejb.bank.entities.Account;
 import ch.uzh.ejb.bank.entities.Customer;
+import ch.uzh.ejb.bank.process.MortgageApplication;
 
 @Remote
 public interface BankApplicationRemote {
@@ -47,4 +48,6 @@ public interface BankApplicationRemote {
 	
 	// session experiment
 	public void test();
+	
+	public void payOutMortgage(MortgageApplication mortgageApplication) throws Exception;
 }
