@@ -551,4 +551,12 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		deposit(sum);
 		em.persist(new Mortgage(mortgageApplication.getCustomer(), sum));
 	}
+
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
+	public void updateCustomer(Customer customer) {
+		if(customer != null) {
+			em.merge(customer);
+		}
+	}
 }

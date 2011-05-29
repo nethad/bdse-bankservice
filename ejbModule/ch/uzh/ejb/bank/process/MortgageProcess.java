@@ -74,7 +74,7 @@ public abstract class MortgageProcess {
 	/**
 	 * Execute the mortgage process.
 	 */
-	public final void execute() {
+	public void execute() {
 		collectCustomerInformation();
 		while(!isCustomerComplete()) {
 			contactCustomer();

@@ -51,4 +51,5 @@ public interface BankApplicationRemote {
 	public void test();
 	
 	public void payOutMortgage(MortgageApplication mortgageApplication) throws Exception;
+	public void updateCustomer(Customer customer);
 }

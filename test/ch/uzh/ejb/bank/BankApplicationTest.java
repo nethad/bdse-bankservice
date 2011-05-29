@@ -6,9 +6,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.ejb.EJBException;
-import javax.security.auth.login.LoginException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,9 +16,6 @@ import ch.uzh.ejb.bank.impl.utils.AccountHistoryUtil;
 
 /**
  * Generic functional tests the public interface of BankApplication.
- * 
- * For security to work, the following key value pair must be defined as part of
- * the VM arguments: -Djava.security.auth.login.config=etc/login.config
  * 
  * @author daniel
  *

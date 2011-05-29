@@ -2,7 +2,6 @@ package ch.uzh.ejb.bank.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.Collection;
@@ -90,7 +89,7 @@ public class MortgageProcessImpl extends MortgageProcess {
 	@Override
 	protected void contactCustomer() {
 		if(!incomplete.isEmpty()) {
-			System.out.println("Customer info not complete, please contact customer to fill in the misisng information.");
+			System.out.println("Customer info not complete, please contact customer to fill in the missing information.");
 			if(incomplete.contains(Incomplete.ACCOUNT_NULL)) {
 				System.out.print(Incomplete.ACCOUNT_NULL + " - Account ID: ");
 				accountId = Long.parseLong(readString());
@@ -105,15 +104,15 @@ public class MortgageProcessImpl extends MortgageProcess {
 			}
 			if(incomplete.contains(Incomplete.LASTNAME)) {
 				System.out.print(Incomplete.LASTNAME + " - Customer Last Name: ");
-				customer.setFirstName(readString());
+				customer.setLastName(readString());
 			}
 			if(incomplete.contains(Incomplete.ADDRESS)) {
 				System.out.print(Incomplete.ADDRESS + " - Customer Address: ");
-				customer.setFirstName(readString());
+				customer.setAddress(readString());
 			}
 			if(incomplete.contains(Incomplete.NATIONALITY)) {
 				System.out.print(Incomplete.NATIONALITY + " - Customer Nationality: ");
-				customer.setFirstName(readString());
+				customer.setNationality(readString());
 			}
 			if(incomplete.contains(Incomplete.GENDER)) {
 				System.out.print(Incomplete.GENDER + " - Customer Gender: (");
@@ -127,10 +126,17 @@ public class MortgageProcessImpl extends MortgageProcess {
 				customer.setGender((Customer.Gender) enums.toArray()[gender]);
 			}
 			if(incomplete.contains(Incomplete.ACCOUNT_CUSTOMER_MISMATCH)) {
-				System.out.print(Incomplete.ACCOUNT_CUSTOMER_MISMATCH + " - Customer ID: (");
+				System.out.print(Incomplete.ACCOUNT_CUSTOMER_MISMATCH + " - Customer ID: ");
 				customerId = Long.parseLong(readString());
-				System.out.print("Account ID: (");
+				System.out.print("Account ID: ");
 				accountId = Long.parseLong(readString());
+			}
+			if(incomplete.contains(Incomplete.FIRSTNAME) || 
+					incomplete.contains(Incomplete.LASTNAME) ||
+					incomplete.contains(Incomplete.ADDRESS) ||
+					incomplete.contains(Incomplete.NATIONALITY) || 
+					incomplete.contains(Incomplete.GENDER)) {
+				bankApplication.updateCustomer(customer);
 			}
 		}
 	}
@@ -138,7 +144,7 @@ public class MortgageProcessImpl extends MortgageProcess {
 	private String readString() {
 		String str = null;
 		
-		BufferedReader br = new BufferedReader(new InputStreamReader(getInputStream()));
+		BufferedReader br = getReader();
 		try {
 			str = br.readLine();
 		} catch (IOException e) {
@@ -148,8 +154,8 @@ public class MortgageProcessImpl extends MortgageProcess {
 		return str;
 	}
 
-	protected InputStream getInputStream() {
-		return System.in;
+	protected BufferedReader getReader() {
+		return new BufferedReader(new InputStreamReader(System.in));
 	}
 
 	@Override
