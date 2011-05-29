@@ -12,6 +12,6 @@ import ch.uzh.ejb.bank.entities.Account;
  */
 @Remote
 public interface BankApplicationTestRemote extends BankApplicationRemote {
-	public void withdrawFailWithRollback(Account account, double value);
+	public void withdrawFailWithRollback(Account account, double value) throws Exception;
 	public boolean isInRole(String role);
 }

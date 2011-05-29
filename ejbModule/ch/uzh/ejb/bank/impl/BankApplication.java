@@ -279,9 +279,9 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	@Override
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public Account deposit(Account toAccount, double value) {
+	public Account deposit(Account toAccount, double value) throws Exception {
 		if(value < 0.0) {
-			throw new IllegalArgumentException("Can only deposit positive values. Use withdraw.");
+			throw new Exception("Can only deposit positive values. Use withdraw.");
 		}
 		toAccount = getAccount(toAccount.getAccountId());
 		toAccount.setBalance(toAccount.getBalance() + value);
@@ -336,11 +336,29 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	public void transfer(Account fromAccount, Account toAccount, double value) throws Exception {
 		if(value < 0.0) {
 			context.setRollbackOnly();
-			throw new IllegalArgumentException("Can only transfer positive values.");
+			throw new Exception("Can only transfer positive values.");
 		} else if (!isLoggedInUserAccountOwnerOrClerkOrAdmin(fromAccount)) {
 			throw new Exception("You are not owner of this account.");
 		}
 		withdraw(fromAccount, value);
+		deposit(toAccount, value);
+	}
+	
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
+	public void transfer(long targetAccountId, double value) throws Exception {
+//		if(value < 0.0) {
+//			context.setRollbackOnly();
+//			throw new Exception("Can only transfer positive values.");
+//		} else if (!isLoggedInUserAccountOwnerOrClerkOrAdmin(fromAccount)) {
+//			throw new Exception("You are not owner of this account.");
+//		}
+		checkIfAccountIsSelected();
+		Account toAccount = getAccount(targetAccountId);
+		if (toAccount == null) {
+			throw new Exception("Target account does not exist.");
+		}
+		withdraw(this.selectedAccount, value);
 		deposit(toAccount, value);
 	}
 	

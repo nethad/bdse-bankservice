@@ -28,10 +28,10 @@ public class BankApplicationTestBean extends BankApplication implements BankAppl
 	@Override
 	@PermitAll
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public void withdrawFailWithRollback(Account account, double value) {
+	public void withdrawFailWithRollback(Account account, double value) throws Exception {
 		withdraw(account, value);
 		context.setRollbackOnly();
-		throw new RuntimeException("This transaction will always fail. (Proof of concept)");
+		throw new Exception("This transaction will always fail. (Proof of concept)");
 	}
 	
 	@Override

@@ -15,6 +15,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
 	BankApplicationTest.class,
 	BankApplicationSecurityTest.class,
+	BankApplicationStatefulTest.class,
 	TestImports.class
 	})
 public class AllTests {}
