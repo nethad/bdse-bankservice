@@ -156,7 +156,9 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 		Account account = createAccount(userCustomer, 200.0);
 		logout();
 		loginAsUser();
-		bankApplication.selectAccount(account.getAccountId());
+		long accountId = account.getAccountId();
+		bankApplication.selectAccount(accountId);
+		assertEquals(accountId, bankApplication.getSelectedAccountId());
 	}
 	
 	@Test

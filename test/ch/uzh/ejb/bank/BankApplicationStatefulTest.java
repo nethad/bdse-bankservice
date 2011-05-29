@@ -108,6 +108,38 @@ public class BankApplicationStatefulTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
+	public void testWithdraw_limit() throws Exception {
+		Customer customer = createCustomer("Hans", "Lustig");
+		bankApplication.selectCustomer(customer.getCustomerId());
+		
+		Account account = createAccount(200.0);
+		long accountId = account.getAccountId();
+		bankApplication.selectAccount(accountId);
+
+		assertEquals(-1000.0, account.getCreditLimit(), 0.01);
+		account = bankApplication.withdraw(1200.0);
+	}
+	
+	@Test
+	public void testWithdraw_overLimit() throws Exception {
+		Customer customer = createCustomer("Hans", "Lustig");
+		bankApplication.selectCustomer(customer.getCustomerId());
+		
+		Account account = createAccount(200.0);
+		long accountId = account.getAccountId();
+		bankApplication.selectAccount(accountId);
+
+		assertEquals(-1000.0, account.getCreditLimit(), 0.01);
+		try {
+			account = bankApplication.withdraw(1201.0);
+			fail("Exception expected");
+		} catch (Exception e) {
+			Account account2 = bankApplication.getAccount(accountId);
+			assertEquals(200.0, account2.getBalance(), 0.01);
+		}
+	}
+	
+	@Test
 	public void testTransfer() throws Exception {
 		Customer customerOne = createCustomer("Hans", "Lustig");
 		long customerOneId = customerOne.getCustomerId();
@@ -170,6 +202,59 @@ public class BankApplicationStatefulTest extends BankApplicationBaseTestCase {
 		} catch (Exception e) {
 			accountOne = bankApplication.getAccount(accountOneId);
 			assertEquals(200.0, accountOne.getBalance(), 0.01);
+		}
+	}
+	
+	@Test
+	public void testTransfer_highestAmountTransferredFromSourceAccount() throws Exception {
+		Customer customerOne = createCustomer("Hans", "Lustig");
+		long customerOneId = customerOne.getCustomerId();
+		bankApplication.selectCustomer(customerOneId);
+		Account accountOne = createAccount(200.0);
+		long accountOneId = accountOne.getAccountId();
+		
+		Customer customerTwo = createCustomer("Fridolin", "Fisch");
+		long customerTwoId = customerTwo.getCustomerId();
+		bankApplication.selectCustomer(customerTwoId);
+		Account accountTwo = createAccount(0.0);
+		long accountTwoId = accountTwo.getAccountId();
+		
+		bankApplication.selectAccount(accountOneId);
+		
+		assertEquals(-1000.0, accountOne.getCreditLimit(), 0.01);
+		bankApplication.transfer(accountTwoId, 1200.0);
+		accountOne = bankApplication.getAccount(accountOneId);
+		accountTwo = bankApplication.getAccount(accountTwoId);
+		assertEquals(-1000.0, accountOne.getBalance(), 0.01);
+		assertEquals(1200.0, accountTwo.getBalance(), 0.01);
+	}
+	
+	@Test
+	public void testTransfer_notEnoughMoneyOnSourceAccount() throws Exception {
+		Customer customerOne = createCustomer("Hans", "Lustig");
+		long customerOneId = customerOne.getCustomerId();
+		bankApplication.selectCustomer(customerOneId);
+		Account accountOne = createAccount(200.0);
+		long accountOneId = accountOne.getAccountId();
+		
+		Customer customerTwo = createCustomer("Fridolin", "Fisch");
+		long customerTwoId = customerTwo.getCustomerId();
+		bankApplication.selectCustomer(customerTwoId);
+		Account accountTwo = createAccount(0.0);
+		long accountTwoId = accountTwo.getAccountId();
+		
+		bankApplication.selectAccount(accountOneId);
+		
+		assertEquals(-1000.0, accountOne.getCreditLimit(), 0.01);
+		
+		try {
+			bankApplication.transfer(accountTwoId, 1201.0);
+			fail("Exception expected");
+		} catch (Exception e) {
+			accountOne = bankApplication.getAccount(accountOneId);
+			accountTwo = bankApplication.getAccount(accountTwoId);
+			assertEquals(200.0, accountOne.getBalance(), 0.01);
+			assertEquals(0.0, accountTwo.getBalance(), 0.01);
 		}
 	}
 

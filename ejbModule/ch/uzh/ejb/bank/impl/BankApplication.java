@@ -171,6 +171,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		checkIfCustomerIsSelected();
 		
 		Account account = new Account(0.0, accountType, interest, creditLimit, this.selectedCustomer);
+		account.setAccountStatus(Status.OPEN);
 		em.persist(account);
 		FinancialTransaction fta = new FinancialTransaction(account, new Date(), 0.0, 
 				AccountHistoryUtil.HISTORY_CREATED);
@@ -191,6 +192,12 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	private void checkIfAccountIsSelected() throws Exception {
 		if (this.selectedAccount == null) {
 			throw new Exception("No account object given");
+		}
+	}
+	
+	private void checkIfAccountIsOpen(Account account) throws Exception {
+		if (account.getAccountStatus() != Status.OPEN) {
+			throw new Exception("Account is closed.");
 		}
 	}
 
@@ -283,6 +290,8 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		if(value < 0.0) {
 			throw new Exception("Can only deposit positive values. Use withdraw.");
 		}
+		checkIfAccountIsOpen(toAccount);
+		
 		toAccount = getAccount(toAccount.getAccountId());
 		toAccount.setBalance(toAccount.getBalance() + value);
 		em.merge(toAccount);
@@ -304,14 +313,16 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	@Override
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public Account withdraw(Account fromAccount, double value) {
+	public Account withdraw(Account fromAccount, double value) throws Exception {
 		if(value < 0.0) {
-			throw new IllegalArgumentException("Can only withdraw positive values. Use deposit.");
+			throw new Exception("Can only withdraw positive values. Use deposit.");
 		}
+		checkIfAccountIsOpen(fromAccount);
+		
 		fromAccount = getAccount(fromAccount.getAccountId());
 		double newValue = fromAccount.getBalance() - value;
 		if(newValue < fromAccount.getCreditLimit()) {
-			throw new IllegalArgumentException("Can not withdraw specified ammount.");
+			throw new Exception("Can not withdraw specified ammount.");
 		}
 		fromAccount.setBalance(newValue);
 		em.merge(fromAccount);
