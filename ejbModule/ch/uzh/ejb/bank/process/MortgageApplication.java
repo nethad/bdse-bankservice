@@ -1,9 +1,13 @@
 package ch.uzh.ejb.bank.process;
 
+import java.io.Serializable;
+
 import ch.uzh.ejb.bank.entities.Customer;
 
-public class MortgageApplication {
+public class MortgageApplication implements Serializable {
 
+	private static final long serialVersionUID = -2549527808988053978L;
+	
 	private boolean notClosed = true;
 	private double requiredSum;
 	private double availableFunds;

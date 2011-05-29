@@ -24,12 +24,14 @@ public class Mortgage implements Serializable {
 	@JoinColumn(name="customerId")
 	private Customer customer;
 	
-	private double sum;
+	private double ammount;
 	
 	public Mortgage(Customer customer, double sum) {
 		this.customer = customer;
-		this.sum = sum;
+		this.ammount = sum;
 	}
+	
+	public Mortgage() {}
 
 	public long getId() {
 		return id;
@@ -43,13 +45,10 @@ public class Mortgage implements Serializable {
 	public void setCustomer(Customer customer) {
 		this.customer = customer;
 	}
-	public double getSum() {
-		return sum;
+	public double getAmmount() {
+		return ammount;
 	}
-	public void setSum(double sum) {
-		this.sum = sum;
+	public void setAmmount(double ammount) {
+		this.ammount = ammount;
 	}
-	
-	
-	
 }

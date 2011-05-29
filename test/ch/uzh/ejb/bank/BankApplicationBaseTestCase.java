@@ -36,6 +36,7 @@ public abstract class BankApplicationBaseTestCase {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		System.setProperty("java.security.auth.login.config", "etc/login.config");
 		Properties props = new Properties();
 		props.put("java.naming.factory.initial", "org.jnp.interfaces.NamingContextFactory");
 		props.put("java.naming.provider.url", "localhost:1099");

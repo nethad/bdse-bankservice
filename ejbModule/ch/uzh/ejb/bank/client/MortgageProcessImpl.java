@@ -2,6 +2,7 @@ package ch.uzh.ejb.bank.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.Collection;
@@ -72,7 +73,7 @@ public class MortgageProcessImpl extends MortgageProcess {
 			}
 		}
 	}
-	Set<Incomplete> incomplete;
+	Set<Incomplete> incomplete = null;
 	
 	public MortgageProcessImpl(BankApplicationRemote bankApplication, long customerId, long accountId) {
 		this.bankApplication = bankApplication;
@@ -88,54 +89,56 @@ public class MortgageProcessImpl extends MortgageProcess {
 
 	@Override
 	protected void contactCustomer() {
-		System.out.println("Customer info not complete, please contact customer to fill in the misisng information.");
-		if(incomplete.contains(Incomplete.ACCOUNT_NULL)) {
-			System.out.print(Incomplete.ACCOUNT_NULL + " - Account ID: ");
-			accountId = Long.parseLong(readString());
-		}
-		if(incomplete.contains(Incomplete.CUSTOMER_NULL)) {
-			System.out.print(Incomplete.CUSTOMER_NULL + " - Customer ID: ");
-			customerId = Long.parseLong(readString());
-		}
-		if(incomplete.contains(Incomplete.FIRSTNAME)) {
-			System.out.print(Incomplete.FIRSTNAME + " - Customer First Name: ");
-			customer.setFirstName(readString());
-		}
-		if(incomplete.contains(Incomplete.LASTNAME)) {
-			System.out.print(Incomplete.LASTNAME + " - Customer Last Name: ");
-			customer.setFirstName(readString());
-		}
-		if(incomplete.contains(Incomplete.ADDRESS)) {
-			System.out.print(Incomplete.ADDRESS + " - Customer Address: ");
-			customer.setFirstName(readString());
-		}
-		if(incomplete.contains(Incomplete.NATIONALITY)) {
-			System.out.print(Incomplete.NATIONALITY + " - Customer Nationality: ");
-			customer.setFirstName(readString());
-		}
-		if(incomplete.contains(Incomplete.GENDER)) {
-			System.out.print(Incomplete.GENDER + " - Customer Gender: (");
-			int ctr = 0;
-			EnumSet<Customer.Gender> enums = EnumSet.allOf(Customer.Gender.class);
-			for(Customer.Gender gender : enums) {
-				System.out.print(ctr++ + " - " + gender);
+		if(!incomplete.isEmpty()) {
+			System.out.println("Customer info not complete, please contact customer to fill in the misisng information.");
+			if(incomplete.contains(Incomplete.ACCOUNT_NULL)) {
+				System.out.print(Incomplete.ACCOUNT_NULL + " - Account ID: ");
+				accountId = Long.parseLong(readString());
 			}
-			System.out.print(") ");
-			int gender = Integer.parseInt(readString());
-			customer.setGender((Customer.Gender) enums.toArray()[gender]);
-		}
-		if(incomplete.contains(Incomplete.ACCOUNT_CUSTOMER_MISMATCH)) {
-			System.out.print(Incomplete.ACCOUNT_CUSTOMER_MISMATCH + " - Customer ID: (");
-			customerId = Long.parseLong(readString());
-			System.out.print("Account ID: (");
-			accountId = Long.parseLong(readString());
+			if(incomplete.contains(Incomplete.CUSTOMER_NULL)) {
+				System.out.print(Incomplete.CUSTOMER_NULL + " - Customer ID: ");
+				customerId = Long.parseLong(readString());
+			}
+			if(incomplete.contains(Incomplete.FIRSTNAME)) {
+				System.out.print(Incomplete.FIRSTNAME + " - Customer First Name: ");
+				customer.setFirstName(readString());
+			}
+			if(incomplete.contains(Incomplete.LASTNAME)) {
+				System.out.print(Incomplete.LASTNAME + " - Customer Last Name: ");
+				customer.setFirstName(readString());
+			}
+			if(incomplete.contains(Incomplete.ADDRESS)) {
+				System.out.print(Incomplete.ADDRESS + " - Customer Address: ");
+				customer.setFirstName(readString());
+			}
+			if(incomplete.contains(Incomplete.NATIONALITY)) {
+				System.out.print(Incomplete.NATIONALITY + " - Customer Nationality: ");
+				customer.setFirstName(readString());
+			}
+			if(incomplete.contains(Incomplete.GENDER)) {
+				System.out.print(Incomplete.GENDER + " - Customer Gender: (");
+				int ctr = 0;
+				EnumSet<Customer.Gender> enums = EnumSet.allOf(Customer.Gender.class);
+				for(Customer.Gender gender : enums) {
+					System.out.print(ctr++ + " - " + gender);
+				}
+				System.out.print(") ");
+				int gender = Integer.parseInt(readString());
+				customer.setGender((Customer.Gender) enums.toArray()[gender]);
+			}
+			if(incomplete.contains(Incomplete.ACCOUNT_CUSTOMER_MISMATCH)) {
+				System.out.print(Incomplete.ACCOUNT_CUSTOMER_MISMATCH + " - Customer ID: (");
+				customerId = Long.parseLong(readString());
+				System.out.print("Account ID: (");
+				accountId = Long.parseLong(readString());
+			}
 		}
 	}
 	
 	private String readString() {
 		String str = null;
 		
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		BufferedReader br = new BufferedReader(new InputStreamReader(getInputStream()));
 		try {
 			str = br.readLine();
 		} catch (IOException e) {
@@ -145,11 +148,15 @@ public class MortgageProcessImpl extends MortgageProcess {
 		return str;
 	}
 
+	protected InputStream getInputStream() {
+		return System.in;
+	}
+
 	@Override
 	protected void computeRequiredFunds() {
 		//do whatever to compute the value here, here is just a very basic implementations etting a fixed value
 		
-		this.application.setRequiredSum(12000.0);
+		this.application.setRequiredSum(120000.0);
 	}
 
 	@Override
@@ -205,9 +212,11 @@ public class MortgageProcessImpl extends MortgageProcess {
 	@Override
 	protected void payOut() {
 		try {
-			bankApplication.selectAccount(accountId);
-			bankApplication.payOutMortgage(application);
-			System.out.println("Mortgage payed to account nr. " + accountId);
+			if(application.getRequiredSum() > application.getAvailableFunds()) {
+				bankApplication.selectAccount(accountId);
+				bankApplication.payOutMortgage(application);
+				System.out.println("Mortgage payed to account nr. " + accountId);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -267,7 +276,9 @@ public class MortgageProcessImpl extends MortgageProcess {
 			complete = false;
 		}
 
-		incomplete = EnumSet.copyOf(incompletes);
+		if(!incompletes.isEmpty()) {
+			incomplete = EnumSet.copyOf(incompletes);
+		}
 		return complete; 
 	}
 	
