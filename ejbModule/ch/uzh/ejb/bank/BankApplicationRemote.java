@@ -28,11 +28,12 @@ public interface BankApplicationRemote {
 	public List<Account> getAllAccounts();
 	public void setAccountStatus(Account account, Account.Status status) throws Exception;
 	
-	public Account deposit(Account toAccount, double value);
+	public Account deposit(Account toAccount, double value) throws Exception;
 	public Account deposit(double value) throws Exception; // stateful
-	public Account withdraw(Account fromAccount, double value);
+	public Account withdraw(Account fromAccount, double value) throws Exception;
 	public Account withdraw(double value) throws Exception; // stateful
 	public void transfer(Account fromAccount, Account toAccount, double value) throws Exception;
+	void transfer(long targetAccountId, double value) throws Exception; // stateful
 	
 	public String getAccountHistory(Account account, Date from, Date to) throws Exception;
 	

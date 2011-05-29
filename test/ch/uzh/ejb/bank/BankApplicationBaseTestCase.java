@@ -81,13 +81,13 @@ public abstract class BankApplicationBaseTestCase {
 		return bankApplication.getCustomer(102);
 	}
 	
-	void reloadBankApplicationBean() {
-		try {
-			bankApplication = (BankApplicationTestRemote) context.lookup("BankApplicationTestBean/remote");
-		} catch (NamingException e) {
-			fail("Could not reload bank application: "+e.getMessage());
-		}
-	}
+//	void reloadBankApplicationBean() {
+//		try {
+//			bankApplication = (BankApplicationTestRemote) context.lookup("BankApplicationTestBean/remote");
+//		} catch (NamingException e) {
+//			fail("Could not reload bank application: "+e.getMessage());
+//		}
+//	}
 	
 	void loginAsUser() {
 		String login = "user";

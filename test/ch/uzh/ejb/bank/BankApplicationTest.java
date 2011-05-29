@@ -127,9 +127,8 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 		
 		try {
 			bankApplication.transfer(account, account2, -1.0);
-			fail("EJBException expected");
-		} catch (EJBException e) {
-			reloadBankApplicationBean();
+			fail("Exception expected");
+		} catch (Exception e) {
 			account = bankApplication.getAccount(account.getAccountId());
 			account2 = bankApplication.getAccount(account2.getAccountId());
 			assertEquals(200.0, account.getBalance(), 0.01);
@@ -145,8 +144,7 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 		try {
 			bankApplication.withdrawFailWithRollback(account, 100.0);
 			fail("EJBException expected.");
-		} catch (EJBException e) {
-			reloadBankApplicationBean();
+		} catch (Exception e) {
 			account = bankApplication.getAccount(account.getAccountId());
 			assertEquals(initialBalance, account.getBalance(), 0.01);
 		}
@@ -158,7 +156,9 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 		Account account = createAccount(userCustomer, 200.0);
 		logout();
 		loginAsUser();
-		bankApplication.selectAccount(account.getAccountId());
+		long accountId = account.getAccountId();
+		bankApplication.selectAccount(accountId);
+		assertEquals(accountId, bankApplication.getSelectedAccountId());
 	}
 	
 	@Test
