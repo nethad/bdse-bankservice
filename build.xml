@@ -7,7 +7,7 @@
 
 
 	<target name="package">
-		<jar destfile="${full-jar-path}" filesetmanifest="mergewithoutmain">
+		<jar destfile="${full-jar-path}" filesetmanifest="mergewithoutmain" update="true">
 			<manifest>
 				<attribute name="Main-Class" value="ch.uzh.ejb.bank.client.CommandLineClient" />
 				<attribute name="Class-Path" value="." />

@@ -34,6 +34,7 @@ import ch.uzh.ejb.bank.client.commands.SelectCustomerCommandHandler;
 import ch.uzh.ejb.bank.client.commands.ShowAccountCommandHandler;
 import ch.uzh.ejb.bank.client.commands.ShowCustomerCommandHandler;
 import ch.uzh.ejb.bank.client.commands.StatusCommandHandler;
+import ch.uzh.ejb.bank.client.commands.TransferCommandHandler;
 import ch.uzh.ejb.bank.client.commands.WithdrawCommandHandler;
 
 import jline.ArgumentCompletor;
@@ -72,6 +73,7 @@ public class CommandLineReader implements BankApplicationProvider {
 		
 		this.commandHandlers.add(new DepositCommandHandler(this));
 		this.commandHandlers.add(new WithdrawCommandHandler(this));
+		this.commandHandlers.add(new TransferCommandHandler(this));
 		
 		this.commandHandlers.add(new MortgageProcessCommandHandler(this));
 	}
