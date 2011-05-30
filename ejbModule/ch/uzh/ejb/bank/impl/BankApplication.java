@@ -80,7 +80,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
     }
     
     @SuppressWarnings("unchecked")
-	private Customer getCustomerByUsername(String userName) {
+	Customer getCustomerByUsername(String userName) {
     	List<Customer> customers = null;
 		if(userName != null) {
 			Query q = em.createNamedQuery("Customer.findByUserName");
