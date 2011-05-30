@@ -169,7 +169,7 @@ public class MortgageProcessImpl extends MortgageProcess {
 	protected void computeAvailableFunds() {
 		double availableFunds = 0.0;
 		try {
-			availableFunds = bankApplication.getTotalBalance(this.customer);
+			availableFunds = bankApplication.getAccount(accountId).getBalance();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -188,7 +188,7 @@ public class MortgageProcessImpl extends MortgageProcess {
 			e.printStackTrace();
 		}
 		
-		//if last years income is at least 10% of the required sum, approove
+		//if last years income is at least 10% of the required sum, approve
 		if(income >= application.getRequiredSum() * 0.1) {
 			application.setApproved(true);
 		}
