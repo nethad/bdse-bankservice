@@ -45,7 +45,6 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	static final String ADMINISTRATOR_ROLE = "administrator";
 	static final String CLERK_ROLE = "clerk";
 	static final String USER_ROLE = "user";
-//	private static final String[] CLERK_OR_HIGHER = new String[]{ADMINISTRATOR_ROLE, CLERK_ROLE};
 
 	@Resource
 	SessionContext context;
@@ -476,6 +475,13 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		}
 		
 		return sb.toString();
+	}
+	
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE, USER_ROLE})
+	public String getAccountHistory(Date from, Date to) throws Exception {
+		checkIfAccountIsSelected();
+		return getAccountHistory(this.selectedAccount, from, to);
 	}
 
 	@Override

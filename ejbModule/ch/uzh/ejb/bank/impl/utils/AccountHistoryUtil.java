@@ -27,13 +27,13 @@ public class AccountHistoryUtil {
 		if(transactions.size() > 0) {
 			for(FinancialTransaction transaction : transactions) {
 				if(transaction.getDate().compareTo(from) >= 0 && 
-						transaction.getDate().compareTo(from) <= 0) {
+						transaction.getDate().compareTo(to) <= 0) {
 					
 					results.add(transaction);
 				}
 			}
 		}
 		
-		return transactions;
+		return results;
 	}
 }

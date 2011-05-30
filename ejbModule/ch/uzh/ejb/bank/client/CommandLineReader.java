@@ -20,6 +20,7 @@ import org.jboss.security.auth.callback.UsernamePasswordHandler;
 import ch.uzh.ejb.bank.BankApplicationRemote;
 import ch.uzh.ejb.bank.BankApplicationTestRemote;
 import ch.uzh.ejb.bank.client.commands.AbstractCommandHandler;
+import ch.uzh.ejb.bank.client.commands.AccountHistoryCommandHandler;
 import ch.uzh.ejb.bank.client.commands.CreateAccountCommandHandler;
 import ch.uzh.ejb.bank.client.commands.CreateCustomerCommandHandler;
 import ch.uzh.ejb.bank.client.commands.DepositCommandHandler;
@@ -70,6 +71,7 @@ public class CommandLineReader implements BankApplicationProvider {
 		this.commandHandlers.add(new ShowCustomerCommandHandler(this));
 		
 		this.commandHandlers.add(new StatusCommandHandler(this));
+		this.commandHandlers.add(new AccountHistoryCommandHandler(this));
 		
 		this.commandHandlers.add(new DepositCommandHandler(this));
 		this.commandHandlers.add(new WithdrawCommandHandler(this));

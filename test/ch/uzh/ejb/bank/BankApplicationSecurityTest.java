@@ -83,6 +83,24 @@ public class BankApplicationSecurityTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
+	public void testDeposit_accountOwner() throws Exception {
+		loginAsClerk();
+		Customer customer = bankApplication.getCustomerByUsername("user");
+		long customerId = customer.getCustomerId();
+		bankApplication.selectCustomer(customerId);
+		Account account = createAccount(200.0);
+		loginAsUser();
+		bankApplication.setDefaultCustomer();
+		try {
+			Account account2 = bankApplication.getAccount(account.getAccountId());
+			bankApplication.deposit(account2, 100.0);
+			fail("EJBException expected");
+		} catch (EJBException e) {
+			assertTrue(e.getMessage().contains("Caller unauthorized"));
+		}
+	}
+	
+	@Test
 	public void testDeposit_notAccountOwner() throws Exception {
 		loginAsClerk();
 		Customer customer = createCustomer("heinz");
@@ -94,6 +112,24 @@ public class BankApplicationSecurityTest extends BankApplicationBaseTestCase {
 		try {
 			Account account2 = bankApplication.getAccount(account.getAccountId());
 			bankApplication.deposit(account2, 100.0);
+			fail("EJBException expected");
+		} catch (EJBException e) {
+			assertTrue(e.getMessage().contains("Caller unauthorized"));
+		}
+	}
+	
+	@Test
+	public void testWithdraw_accountOwner() throws Exception {
+		loginAsClerk();
+		Customer customer = bankApplication.getCustomerByUsername("user");
+		long customerId = customer.getCustomerId();
+		bankApplication.selectCustomer(customerId);
+		Account account = createAccount(200.0);
+		loginAsUser();
+		bankApplication.setDefaultCustomer();
+		try {
+			Account account2 = bankApplication.getAccount(account.getAccountId());
+			bankApplication.withdraw(account2, 100.0);
 			fail("EJBException expected");
 		} catch (EJBException e) {
 			assertTrue(e.getMessage().contains("Caller unauthorized"));

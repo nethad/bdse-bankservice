@@ -36,6 +36,7 @@ public interface BankApplicationRemote {
 	void transfer(long targetAccountId, double value) throws Exception; // stateful
 	
 	public String getAccountHistory(Account account, Date from, Date to) throws Exception;
+	public String getAccountHistory(Date from, Date to) throws Exception; // stateful
 	
 	public double getTotalBalance(Customer customer) throws Exception;
 	public double getIncome(Customer customer, Date from, Date to) throws Exception;
@@ -52,4 +53,6 @@ public interface BankApplicationRemote {
 	
 	public void payOutMortgage(MortgageApplication mortgageApplication) throws Exception;
 	public void updateCustomer(Customer customer);
+
+	
 }
