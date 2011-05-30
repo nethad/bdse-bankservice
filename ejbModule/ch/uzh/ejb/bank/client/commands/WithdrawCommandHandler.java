@@ -19,8 +19,7 @@ public class WithdrawCommandHandler extends AbstractCommandHandler {
 
 	@Override
 	public String getUsage() {
-		// TODO Auto-generated method stub
-		return null;
+		return getCommand()+" [amount]";
 	}
 
 	@Override

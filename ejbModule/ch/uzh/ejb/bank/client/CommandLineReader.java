@@ -21,12 +21,14 @@ import ch.uzh.ejb.bank.BankApplicationRemote;
 import ch.uzh.ejb.bank.BankApplicationTestRemote;
 import ch.uzh.ejb.bank.client.commands.AbstractCommandHandler;
 import ch.uzh.ejb.bank.client.commands.AccountHistoryCommandHandler;
+import ch.uzh.ejb.bank.client.commands.AddShareCommandHandler;
 import ch.uzh.ejb.bank.client.commands.CreateAccountCommandHandler;
 import ch.uzh.ejb.bank.client.commands.CreateCustomerCommandHandler;
 import ch.uzh.ejb.bank.client.commands.DepositCommandHandler;
 import ch.uzh.ejb.bank.client.commands.GetAccountsCommandHandler;
 import ch.uzh.ejb.bank.client.commands.GetAllAccountsCommandHandler;
 import ch.uzh.ejb.bank.client.commands.GetAllCustomersCommandHandler;
+import ch.uzh.ejb.bank.client.commands.GetPortfolioCommandHandler;
 import ch.uzh.ejb.bank.client.commands.HelpCommandHandler;
 import ch.uzh.ejb.bank.client.commands.LoginCommandHandler;
 import ch.uzh.ejb.bank.client.commands.MortgageProcessCommandHandler;
@@ -76,6 +78,9 @@ public class CommandLineReader implements BankApplicationProvider {
 		this.commandHandlers.add(new DepositCommandHandler(this));
 		this.commandHandlers.add(new WithdrawCommandHandler(this));
 		this.commandHandlers.add(new TransferCommandHandler(this));
+		
+		this.commandHandlers.add(new AddShareCommandHandler(this));
+		this.commandHandlers.add(new GetPortfolioCommandHandler(this));
 		
 		this.commandHandlers.add(new MortgageProcessCommandHandler(this));
 	}
