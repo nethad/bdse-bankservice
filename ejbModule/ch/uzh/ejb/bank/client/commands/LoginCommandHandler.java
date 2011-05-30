@@ -1,6 +1,5 @@
 package ch.uzh.ejb.bank.client.commands;
 
-import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import javax.security.auth.login.LoginContext;
@@ -28,7 +27,7 @@ public class LoginCommandHandler extends AbstractCommandHandler {
 				password.toCharArray());
 		LoginContext loginContext = new LoginContext("ba", handler);
 		loginContext.login();
-		getBankApplication().setDefaultCustomer();
+		getBankApplication().selectLoggedInUser();
 	}
 
 	@Override

@@ -88,7 +88,7 @@ public class BankApplicationSecurityTest extends BankApplicationBaseTestCase {
 		bankApplication.selectCustomer(customerId);
 		Account account = createAccount(200.0);
 		loginAsUser();
-		bankApplication.setDefaultCustomer();
+		bankApplication.selectLoggedInUser();
 		try {
 			Account account2 = bankApplication.getAccount(account.getAccountId());
 			bankApplication.deposit(account2, 100.0);
@@ -106,7 +106,7 @@ public class BankApplicationSecurityTest extends BankApplicationBaseTestCase {
 		bankApplication.selectCustomer(customerId);
 		Account account = createAccount(200.0);
 		loginAsUser();
-		bankApplication.setDefaultCustomer();
+		bankApplication.selectLoggedInUser();
 		try {
 			Account account2 = bankApplication.getAccount(account.getAccountId());
 			bankApplication.deposit(account2, 100.0);
@@ -124,7 +124,7 @@ public class BankApplicationSecurityTest extends BankApplicationBaseTestCase {
 		bankApplication.selectCustomer(customerId);
 		Account account = createAccount(200.0);
 		loginAsUser();
-		bankApplication.setDefaultCustomer();
+		bankApplication.selectLoggedInUser();
 		try {
 			Account account2 = bankApplication.getAccount(account.getAccountId());
 			bankApplication.withdraw(account2, 100.0);
@@ -142,7 +142,7 @@ public class BankApplicationSecurityTest extends BankApplicationBaseTestCase {
 		bankApplication.selectCustomer(customerId);
 		Account account = createAccount(200.0);
 		loginAsUser();
-		bankApplication.setDefaultCustomer();
+		bankApplication.selectLoggedInUser();
 		try {
 			Account account2 = bankApplication.getAccount(account.getAccountId());
 			bankApplication.withdraw(account2, 100.0);
@@ -163,7 +163,7 @@ public class BankApplicationSecurityTest extends BankApplicationBaseTestCase {
 		Account targetAccount = createAccount(bankApplication.getCustomerByUsername("user"), 200.0);
 		long targetAccountId = targetAccount.getAccountId();
 		loginAsUser();
-		bankApplication.setDefaultCustomer();
+		bankApplication.selectLoggedInUser();
 		try {
 			targetAccount = bankApplication.getAccount(targetAccountId);
 			bankApplication.transfer(sourceAccount, targetAccount, 100.0);
@@ -194,7 +194,8 @@ public class BankApplicationSecurityTest extends BankApplicationBaseTestCase {
 		Account account = createAccount(customer, 200.0);
 		loginAsUser();
 		try {
-			bankApplication.setAccountStatus(account, Status.CLOSED);
+			bankApplication.selectAccount(account.getAccountId());
+			bankApplication.setAccountStatus(Status.CLOSED);
 			fail("Exception expected");
 		} catch (Exception e) {
 			assertTrue(e.getMessage().contains("You are not owner of this account."));

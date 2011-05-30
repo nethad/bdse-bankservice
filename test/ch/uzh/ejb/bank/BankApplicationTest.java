@@ -176,39 +176,42 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	public void totalBalanceTest() throws Exception {
 		Customer customer = createCustomer("Aaron", "Aal");
 		createAccount(customer, 200.0);
-		assertEquals(200.0, bankApplication.getTotalBalance(customer), 0.1);
+		bankApplication.selectCustomer(customer.getCustomerId());
+		assertEquals(200.0, bankApplication.getTotalBalance(), 0.1);
 		Account account = createAccount(customer, 0.0);
 		bankApplication.withdraw(account, 1000.0);
 		bankApplication.deposit(account, 500.0);
-		assertEquals(-300.0, bankApplication.getTotalBalance(customer), 0.1);
+		assertEquals(-300.0, bankApplication.getTotalBalance(), 0.1);
 	}
 	
 	@Test
 	public void incomeTest() throws Exception {
 		Customer customer = createCustomer("Berta", "Braun");
 		Account account = createAccount(customer, 200.0);
-		assertEquals(200.0, bankApplication.getIncome(customer, new Date(0), new Date()), 0.1);
+		bankApplication.selectCustomer(customer.getCustomerId());
+		assertEquals(200.0, bankApplication.getIncome(new Date(0), new Date()), 0.1);
 		bankApplication.deposit(account, 1.0);
-		assertEquals(201.0, bankApplication.getIncome(customer, new Date(0), new Date()), 0.1);
+		assertEquals(201.0, bankApplication.getIncome(new Date(0), new Date()), 0.1);
 		bankApplication.withdraw(account, 1.0);
-		assertEquals(201.0, bankApplication.getIncome(customer, new Date(0), new Date()), 0.1);
+		assertEquals(201.0, bankApplication.getIncome(new Date(0), new Date()), 0.1);
 		Account account2 = createAccount(customer, 0.0);
 		bankApplication.deposit(account2, 1.0);
-		assertEquals(202.0, bankApplication.getIncome(customer, new Date(0), new Date()), 0.1);
+		assertEquals(202.0, bankApplication.getIncome(new Date(0), new Date()), 0.1);
 	}
 	
 	@Test
 	public void netChangeTest() throws Exception {
 		Customer customer = createCustomer("Charlie", "Chaplin");
 		Account account = createAccount(customer, 200.0);
-		assertEquals(200.0, bankApplication.getNetChange(customer, new Date(0), new Date()), 0.1);
+		bankApplication.selectCustomer(customer.getCustomerId());
+		assertEquals(200.0, bankApplication.getNetChange(new Date(0), new Date()), 0.1);
 		bankApplication.deposit(account, 1.0);
-		assertEquals(201.0, bankApplication.getNetChange(customer, new Date(0), new Date()), 0.1);
+		assertEquals(201.0, bankApplication.getNetChange(new Date(0), new Date()), 0.1);
 		bankApplication.withdraw(account, 1.0);
-		assertEquals(200.0, bankApplication.getNetChange(customer, new Date(0), new Date()), 0.1);
+		assertEquals(200.0, bankApplication.getNetChange(new Date(0), new Date()), 0.1);
 		Account account2 = createAccount(customer, 0.0);
 		bankApplication.withdraw(account2, 1.0);
-		assertEquals(199.0, bankApplication.getNetChange(customer, new Date(0), new Date()), 0.1);
+		assertEquals(199.0, bankApplication.getNetChange(new Date(0), new Date()), 0.1);
 	}
 	
 	@Test
@@ -281,16 +284,17 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 		Customer userCustomer = getDefaultUserCustomer();
 		Account account = createAccount(userCustomer, 200.0);
 		Account account2 = createAccount(createCustomer("Al", "Capone"), 1000000000.0);
-		bankApplication.setAccountStatus(account, Account.Status.OPEN);
-		bankApplication.deposit(account, 10000.0);
+		bankApplication.selectAccount(account.getAccountId());
+		bankApplication.setAccountStatus(Account.Status.OPEN);
+		bankApplication.deposit(10000.0);
 		logout();
 		loginAsUser();
-		bankApplication.transfer(account, account2, 245.65);
-		bankApplication.transfer(account, account2, 10.95);
-		bankApplication.transfer(account, account2, 1.20);
+		bankApplication.transfer(account2.getAccountId(), 245.65);
+		bankApplication.transfer(account2.getAccountId(), 10.95);
+		bankApplication.transfer(account2.getAccountId(), 1.20);
 		logout();
 		loginAsAdmin();
-		bankApplication.setAccountStatus(account, Account.Status.CLOSED);
+		bankApplication.setAccountStatus(Account.Status.CLOSED);
 		logout();
 		loginAsUser();
 		Date to = new Date();

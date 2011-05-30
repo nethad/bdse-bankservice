@@ -15,7 +15,7 @@ public class GetAccountsCommandHandler extends AbstractCommandHandler {
 
 	@Override
 	public void execute(StringTokenizer tokenizer) throws Exception {
-		List<Account> accounts = getBankApplication().getAccounts();
+		List<Account> accounts = getBankApplication().getSelectedUserAccounts();
 		printList(accounts);
 	}
 

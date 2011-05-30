@@ -183,7 +183,8 @@ public class MortgageProcessImpl extends MortgageProcess {
 		
 		double income = 0.0;
 		try {
-			income = bankApplication.getIncome(customer, cal.getTime(), new Date());
+			bankApplication.selectCustomer(customerId);
+			income = bankApplication.getIncome(cal.getTime(), new Date());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

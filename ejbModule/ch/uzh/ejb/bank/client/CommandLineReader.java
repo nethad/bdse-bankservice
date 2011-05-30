@@ -116,7 +116,7 @@ public class CommandLineReader implements BankApplicationProvider {
 
 	public void start() throws IOException {
 		String line;
-		PrintWriter out = new PrintWriter(System.out);
+//		PrintWriter out = new PrintWriter(System.out);
 
 		while ((line = reader.readLine("bankservice> ")) != null) {
 //			out.println("==> " + line);

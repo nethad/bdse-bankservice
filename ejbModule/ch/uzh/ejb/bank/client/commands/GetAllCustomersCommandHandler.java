@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import ch.uzh.ejb.bank.client.BankApplicationProvider;
-import ch.uzh.ejb.bank.entities.Account;
 import ch.uzh.ejb.bank.entities.Customer;
 
 public class GetAllCustomersCommandHandler extends AbstractCommandHandler {
