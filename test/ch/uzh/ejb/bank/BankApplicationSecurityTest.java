@@ -54,24 +54,16 @@ public class BankApplicationSecurityTest extends BankApplicationBaseTestCase {
 		loginAsUser();
 		assertTrue(bankApplication.isInRole("user"));
 	}
-
-//	@Test
-//	public void createCustomer_notAllowedByUser() {
-//		loginAsUser();
-//		Customer customer = createCustomer("Hans", "Lustig");
-//		assertNotNull(customer);
-//	}
-
-	public static void login(String username, String password)
-	throws LoginException {
-		UsernamePasswordHandler handler =
-			new UsernamePasswordHandler(username, password.toCharArray());
-		loginContext = new LoginContext("ba", handler);
-		loginContext.login();
+	
+	@Test
+	public void testCreateAccount_inUserRole() throws Exception {
+		loginAsUser();
+		try {
+			createAccount(200.0);
+			fail("Exception expected");
+		} catch (EJBException e) {
+			assertTrue(e.getMessage().contains("Caller unauthorized"));
+		}
 	}
 	
-	public static void logout()
-	throws LoginException {
-		loginContext.logout();
-	}
 }

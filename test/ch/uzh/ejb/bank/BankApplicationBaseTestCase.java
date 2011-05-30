@@ -68,6 +68,12 @@ public abstract class BankApplicationBaseTestCase {
 		Account account = bankApplication.createAccount(balance, Account.Type.PRIVATE_DEBIT, 1.25f, -1000.0);
 		return account;
 	}
+	
+	// stateful
+	Account createAccount(double balance) throws Exception {
+		Account account = bankApplication.createAccount(balance, Account.Type.PRIVATE_DEBIT, 1.25f, -1000.0);
+		return account;
+	}
 
 	/**
 	 * Create a customer with given first and last name. 
@@ -122,6 +128,7 @@ public abstract class BankApplicationBaseTestCase {
 			new UsernamePasswordHandler(username, password.toCharArray());
 		loginContext = new LoginContext("ba", handler);
 		loginContext.login();
+//		bankApplication.setDefaultCustomer();
 	}
 	
 	public static void logout() throws LoginException {
