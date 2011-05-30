@@ -678,6 +678,6 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		selectCustomer(buyer.getCustomerId());
 		addShare(symbol, quantity, price);
 		transfer(buyerAccount, selectedAccount, price);
-		selectAccount(seller.getCustomerId());
+		selectCustomer(seller.getCustomerId());
 	}
 }
