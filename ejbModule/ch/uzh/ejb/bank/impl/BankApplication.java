@@ -667,6 +667,9 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		checkIfCustomerIsSelected();
 		checkIfAccountIsSelected();
 		Customer seller = selectedCustomer;
+		if(!selectedAccount.getCustomer().equals(seller)) {
+			throw new Exception("Selected account does not belong to the selected customer.");
+		}
 		
 		Account buyerAccount = getAccount(buyerAccountId);
 		if (buyerAccount == null) {
