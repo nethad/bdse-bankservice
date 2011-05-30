@@ -1,2 +1,2 @@
 #!/bin/sh
-java -Djava.ext.dirs=lib/client -jar dist/bdse-cli.jar
+java -Djava.ext.dirs=lib/client:lib/common -jar dist/bdse-cli.jar

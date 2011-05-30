@@ -163,6 +163,7 @@ public class CommandLineReader implements BankApplicationProvider {
 			if (handler.getCommand().equals(firstToken)) {
 				executeHandler(tokenizer, handler);
 				foundHandler = true;
+				break;
 			}
 		}
 		if (foundHandler == false) {
