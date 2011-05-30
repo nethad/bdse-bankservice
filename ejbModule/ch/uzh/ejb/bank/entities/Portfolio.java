@@ -22,7 +22,7 @@ public class Portfolio implements Serializable {
 	private Customer customer;
 	
 	@OneToMany(mappedBy="portfolio")
-	private List<Share> stocks;
+	private List<Share> shares;
 
 	public long getPortfolioId() {
 		return portfolioId;
@@ -36,11 +36,7 @@ public class Portfolio implements Serializable {
 		this.customer = customer;
 	}
 
-	public List<Share> getStocks() {
-		return stocks;
-	}
-
-	public void setStocks(List<Share> stocks) {
-		this.stocks = stocks;
+	public List<Share> getShares() {
+		return shares;
 	}
 }

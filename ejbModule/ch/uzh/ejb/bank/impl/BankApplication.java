@@ -173,7 +173,8 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		
 		checkIfCustomerIsSelected();
 		
-		Account account = new Account(0.0, accountType, interest, creditLimit, this.selectedCustomer);
+		Account account = new Account(0.0, accountType, interest, creditLimit);
+		account.setCustomer(getManagedEntity(this.selectedCustomer));
 		account.setAccountStatus(Status.OPEN);
 		em.persist(account);
 		FinancialTransaction fta = new FinancialTransaction(account, new Date(), 0.0, 
