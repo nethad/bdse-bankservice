@@ -28,7 +28,10 @@ import ch.uzh.ejb.bank.client.commands.DepositCommandHandler;
 import ch.uzh.ejb.bank.client.commands.GetAccountsCommandHandler;
 import ch.uzh.ejb.bank.client.commands.GetAllAccountsCommandHandler;
 import ch.uzh.ejb.bank.client.commands.GetAllCustomersCommandHandler;
+import ch.uzh.ejb.bank.client.commands.GetIncome12MonthsCommandHandler;
+import ch.uzh.ejb.bank.client.commands.GetNetChange12MonthsCommandHandler;
 import ch.uzh.ejb.bank.client.commands.GetPortfolioCommandHandler;
+import ch.uzh.ejb.bank.client.commands.GetTotalBalanceComandHandler;
 import ch.uzh.ejb.bank.client.commands.HelpCommandHandler;
 import ch.uzh.ejb.bank.client.commands.LoginCommandHandler;
 import ch.uzh.ejb.bank.client.commands.MortgageProcessCommandHandler;
@@ -72,6 +75,10 @@ public class CommandLineReader implements BankApplicationProvider {
 		this.commandHandlers.add(new SelectAccountCommandHandler(this));
 		this.commandHandlers.add(new ShowAccountCommandHandler(this));
 		this.commandHandlers.add(new ShowCustomerCommandHandler(this));
+		
+		this.commandHandlers.add(new GetTotalBalanceComandHandler(this));
+		this.commandHandlers.add(new GetIncome12MonthsCommandHandler(this));
+		this.commandHandlers.add(new GetNetChange12MonthsCommandHandler(this));
 		
 		this.commandHandlers.add(new StatusCommandHandler(this));
 		this.commandHandlers.add(new AccountHistoryCommandHandler(this));
