@@ -117,7 +117,8 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 
 	@Override
 	@SuppressWarnings("unchecked")
-	@PermitAll
+//	@PermitAll
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
 	public List<Customer> getCustomer(String firstName, String lastName) {
 		List<Customer> customers = null;
 		if(firstName != null && lastName != null) {
@@ -134,7 +135,8 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	}
 
 	@Override
-	@PermitAll
+//	@PermitAll
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
 	public Customer getCustomer(long id) {
 		Customer customer = null;
 		if(id >= 0) {

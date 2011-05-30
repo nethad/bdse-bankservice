@@ -258,9 +258,4 @@ public class BankApplicationStatefulTest extends BankApplicationBaseTestCase {
 		}
 	}
 
-	private Account createAccount(double balance) throws Exception {
-		Account account = bankApplication.createAccount(balance, Account.Type.PRIVATE_DEBIT, 1.25f, -1000.0);
-		return account;
-	}
-
 }
