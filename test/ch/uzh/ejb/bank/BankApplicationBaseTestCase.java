@@ -84,6 +84,11 @@ public abstract class BankApplicationBaseTestCase {
 				firstName, lastName, "Lustiggasse 5, 9999 Lustigburg", Customer.Gender.MALE, "CH");
 	}
 	
+	Customer createCustomer(String userName) {
+		return bankApplication.createCustomer(userName, userName, 
+				userName, "lastname", "Lustiggasse 5, 9999 Lustigburg", Customer.Gender.MALE, "CH");
+	}
+	
 	Customer getDefaultUserCustomer() {
 		return bankApplication.getCustomer(102);
 	}

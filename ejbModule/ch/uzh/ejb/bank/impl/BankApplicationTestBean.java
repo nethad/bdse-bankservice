@@ -12,6 +12,7 @@ import org.jboss.ejb3.annotation.SecurityDomain;
 
 import ch.uzh.ejb.bank.BankApplicationTestRemote;
 import ch.uzh.ejb.bank.entities.Account;
+import ch.uzh.ejb.bank.entities.Customer;
 
 /**
  * Unit-Test access bean implementation.
@@ -38,4 +39,11 @@ public class BankApplicationTestBean extends BankApplication implements BankAppl
 	public boolean isInRole(String role) {
 		return context.isCallerInRole(role);
 	}
+	
+	@Override
+	public Customer getCustomerByUsername(String userName) {
+		return super.getCustomerByUsername(userName);
+	}
+	
+	
 }
