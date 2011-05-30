@@ -225,7 +225,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 
 	@Override
 	@SuppressWarnings("unchecked")
-	@PermitAll
+	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
 	public List<Account> getAccounts(Customer customer) {
 		List<Account> accounts = null;
 		if(customer != null) {

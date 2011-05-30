@@ -1,11 +1,8 @@
 package ch.uzh.ejb.bank.client.commands;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.StringTokenizer;
-
-import javax.swing.text.DateFormatter;
 
 import ch.uzh.ejb.bank.client.BankApplicationProvider;
 
