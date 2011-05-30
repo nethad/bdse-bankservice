@@ -30,6 +30,8 @@ import ch.uzh.ejb.bank.entities.Customer;
 import ch.uzh.ejb.bank.entities.FinancialTransaction;
 import ch.uzh.ejb.bank.entities.Account.Status;
 import ch.uzh.ejb.bank.entities.Mortgage;
+import ch.uzh.ejb.bank.entities.Portfolio;
+import ch.uzh.ejb.bank.entities.Share;
 import ch.uzh.ejb.bank.impl.utils.AccountHistoryUtil;
 import ch.uzh.ejb.bank.process.MortgageApplication;
 
@@ -142,7 +144,8 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 			Query q = em.createNamedQuery("Customer.findById");
 			q.setParameter("id", id);
 			try {
-				customer = (Customer) q.getSingleResult();			
+				customer = (Customer) q.getSingleResult();
+				customer.getAccounts();
 			} catch(Exception ex) {
 				customer = null;
 			}
@@ -566,5 +569,116 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		if(customer != null) {
 			em.merge(customer);
 		}
+	}
+
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE})
+	public Portfolio createPortfolio() throws Exception {
+		checkIfCustomerIsSelected();
+		Portfolio portfolio = new Portfolio(selectedCustomer);
+		em.persist(portfolio);
+		return portfolio;
+	}
+	
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE})
+	public Portfolio getCustomerPortfolio() throws Exception {
+		checkIfCustomerIsSelected();
+		Query q = em.createNamedQuery("Portfolio.findByCustomer");
+		q.setParameter("customer", selectedCustomer);
+		Portfolio portfolio = (Portfolio) q.getSingleResult();
+		return portfolio;
+	}
+
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE})
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	public void addShare(String symbol, long quantity, double purchasePrice) throws Exception {
+		checkIfCustomerIsSelected();
+		if(symbol.trim().isEmpty()) {
+			throw new Exception("Invalid symbol.");
+		}
+		if(quantity < 0) {
+			throw new Exception("Invalid quatity.");
+		}
+		if(purchasePrice < 0.0) {
+			throw new Exception("Invalid purchasePrice.");
+		}
+		Portfolio portfolio = getCustomerPortfolio();
+		if(portfolio != null && portfolio.getCustomer().equals(selectedCustomer)) {
+			Query q = em.createNamedQuery("Share.findBySymbolAndPortfolio");
+			q.setParameter("symbol", symbol);
+			q.setParameter("portfolio", portfolio);
+			Share share = null;
+			if(q.getResultList().size() > 0) {
+				share = (Share) q.getSingleResult();
+				long oldQ = share.getQuantity();
+				share.setQuantity(oldQ + quantity);
+				share.setAveragePurchasePrice((oldQ * share.getAveragePurchasePrice() + 
+						quantity*purchasePrice)/(oldQ + quantity));
+				return;
+			}
+			share = new Share(symbol, quantity, purchasePrice);
+			share.setPortfolio(portfolio);
+			em.persist(share);
+		} else {
+			throw new Exception("Customer does not have a valid portfolio.");
+		}
+	}
+
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE})
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	public void removeShare(String symbol, long quantity) throws Exception {
+		checkIfCustomerIsSelected();
+		if(symbol.trim().isEmpty()) {
+			throw new Exception("Invalid symbol.");
+		}
+		if(quantity < 0) {
+			throw new Exception("Invalid quatity.");
+		}
+		Portfolio portfolio = getCustomerPortfolio();
+		if(portfolio != null && portfolio.getCustomer().equals(selectedCustomer)) {
+			Query q = em.createNamedQuery("Share.findBySymbolAndPortfolio");
+			q.setParameter("symbol", symbol);
+			q.setParameter("portfolio", portfolio);
+			if(q.getResultList().size() > 0) {
+				Share share = (Share) q.getSingleResult();
+				if(share.getQuantity() < quantity) {
+					throw new Exception("Customer does not have enough shares.");
+				}
+				share.setQuantity(share.getQuantity() - quantity);
+				if(share.getQuantity() == 0) {
+					em.remove(share);
+				}
+			} else {
+				throw new Exception("Customer does not have such shares.");
+			}
+		} else {
+			throw new Exception("Customer does not have a valid portfolio.");
+		}
+	}
+
+	@Override
+	@RolesAllowed({ADMINISTRATOR_ROLE})
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	public void transferShare(long buyerAccountId, String symbol,
+			long quantity, double price) throws Exception {
+		
+		checkIfCustomerIsSelected();
+		checkIfAccountIsSelected();
+		Customer seller = selectedCustomer;
+		
+		Account buyerAccount = getAccount(buyerAccountId);
+		if (buyerAccount == null) {
+			throw new Exception("Target account does not exist.");
+		}
+		Customer buyer = buyerAccount.getCustomer();
+		
+		removeShare(symbol, quantity);
+		selectCustomer(buyer.getCustomerId());
+		addShare(symbol, quantity, price);
+		transfer(buyerAccount, selectedAccount, price);
+		selectAccount(seller.getCustomerId());
 	}
 }

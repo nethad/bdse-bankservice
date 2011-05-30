@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import ch.uzh.ejb.bank.entities.Account;
 import ch.uzh.ejb.bank.entities.Customer;
+import ch.uzh.ejb.bank.entities.Portfolio;
 import ch.uzh.ejb.bank.impl.utils.AccountHistoryUtil;
 
 /**
@@ -208,6 +209,72 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 		Account account2 = createAccount(customer, 0.0);
 		bankApplication.withdraw(account2, 1.0);
 		assertEquals(199.0, bankApplication.getNetChange(customer, new Date(0), new Date()), 0.1);
+	}
+	
+	@Test
+	public void portfolioTest() throws Exception {
+		Customer customer = createCustomer("Fritz", "Freitag");
+		bankApplication.selectCustomer(customer.getCustomerId());
+		Portfolio portfolio = bankApplication.createPortfolio();
+		assertEquals(customer, portfolio.getCustomer());
+		assertTrue(0 == portfolio.getShares().size());
+		Portfolio portfolio2 = bankApplication.getCustomerPortfolio();
+		assertEquals(portfolio.getPortfolioId(), portfolio2.getPortfolioId());
+	}
+	
+	@Test
+	public void shareTest() throws Exception {
+		Customer customer = createCustomer("Michael", "Mittwoch");
+		bankApplication.selectCustomer(customer.getCustomerId());
+		Account account = createAccount(1000.0);
+		bankApplication.createPortfolio();
+			
+		Customer customer2 = createCustomer("Donald", "Donnerstag");
+		bankApplication.selectCustomer(customer2.getCustomerId());
+		Account account2 = createAccount(1000.0);
+		bankApplication.createPortfolio();
+		bankApplication.addShare("APP", 100, 100.00);
+		Portfolio portfolio2 = bankApplication.getCustomerPortfolio();
+		assertTrue(portfolio2.getShares().size() == 1);
+		assertTrue(portfolio2.getShares().get(0).getSymbol().equals("APP"));
+		assertTrue(portfolio2.getShares().get(0).getQuantity() == 100);
+		assertTrue(portfolio2.getShares().get(0).getAveragePurchasePrice() == 100.0);
+		bankApplication.addShare("APP", 100, 200.0);
+		portfolio2 = bankApplication.getCustomerPortfolio();
+		assertTrue(portfolio2.getShares().size() == 1);
+		assertTrue(portfolio2.getShares().get(0).getAveragePurchasePrice() == 150.0);
+		assertTrue(portfolio2.getShares().get(0).getQuantity() == 200);
+		bankApplication.addShare("MCS", 10, 101.54);
+		portfolio2 = bankApplication.getCustomerPortfolio();
+		assertTrue(portfolio2.getShares().size() == 2);
+		bankApplication.removeShare("MCS", 10);
+		portfolio2 = bankApplication.getCustomerPortfolio();
+		assertTrue(portfolio2.getShares().size() == 1);
+		bankApplication.removeShare("APP", 150);
+		portfolio2 = bankApplication.getCustomerPortfolio();
+		assertTrue(portfolio2.getShares().size() == 1);
+		assertTrue(portfolio2.getShares().get(0).getQuantity() == 50);
+	
+		bankApplication.selectCustomer(customer.getCustomerId());
+		Portfolio portfolio = bankApplication.getCustomerPortfolio();
+		assertTrue(portfolio.getShares().size() == 0);
+		
+		bankApplication.selectCustomer(customer2.getCustomerId());
+		bankApplication.selectAccount(account2.getAccountId());
+		bankApplication.transferShare(account.getAccountId(), "APP", 25, 500.0);
+		portfolio2 = bankApplication.getCustomerPortfolio();
+		assertTrue(portfolio2.getShares().size() == 1);
+		assertTrue(portfolio2.getShares().get(0).getQuantity() == 25);
+		account2 = bankApplication.getAccount(account2.getAccountId());
+		assertTrue(account2.getBalance() == 1500.0);
+		
+		bankApplication.selectCustomer(customer.getCustomerId());
+		bankApplication.selectAccount(account.getAccountId());
+		portfolio = bankApplication.getCustomerPortfolio();
+		account = bankApplication.getAccount(account.getAccountId());
+		assertTrue(portfolio2.getShares().size() == 1);
+		assertTrue(portfolio2.getShares().get(0).getQuantity() == 25);
+		assertTrue(account.getBalance() == 500.0);
 	}
 	
 	@Test

@@ -8,15 +8,19 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 @Entity
 @Table(name="SHARES")
+@NamedQueries({
+	@NamedQuery(name="Share.findBySymbolAndPortfolio",
+			query="SELECT OBJECT(s) FROM Share s WHERE s.symbol=:symbol AND s.portfolio=:portfolio")
+})
 public class Share implements Serializable {
 	
 	private static final long serialVersionUID = 8599928676653269841L;
-	
-	public Share() {}
 	
 	@Id
 	@GeneratedValue
@@ -24,13 +28,21 @@ public class Share implements Serializable {
 	
 	private String symbol;
 	
-	@ManyToOne(fetch=FetchType.EAGER)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="portfolioId")
 	private Portfolio portfolio;
 	
 	private long quantity;
 	
-	private double purchasePrice;
+	private double avgPrice;
+	
+	public Share() {}
+
+	public Share(String symbol, long quantity, double purchasePrice) {
+		this.symbol = symbol;
+		this.quantity = quantity;
+		this.avgPrice = purchasePrice;
+	}
 
 	public long getShareId() {
 		return shareId;
@@ -49,7 +61,13 @@ public class Share implements Serializable {
 	}
 
 	public void setPortfolio(Portfolio portfolio) {
+		if(this.portfolio instanceof Portfolio) {
+			this.portfolio.getShares().remove(this);
+		}
 		this.portfolio = portfolio;
+		if(!portfolio.getShares().contains(this)) {
+			portfolio.getShares().add(this);
+		}
 	}
 
 	public long getQuantity() {
@@ -60,11 +78,11 @@ public class Share implements Serializable {
 		this.quantity = quantity;
 	}
 
-	public double getPurchasePrice() {
-		return purchasePrice;
+	public double getAveragePurchasePrice() {
+		return avgPrice;
 	}
 
-	public void setPurchasePrice(double purchasePrice) {
-		this.purchasePrice = purchasePrice;
+	public void setAveragePurchasePrice(double purchasePrice) {
+		this.avgPrice = purchasePrice;
 	}
 }

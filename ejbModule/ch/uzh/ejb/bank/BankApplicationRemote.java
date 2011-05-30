@@ -6,6 +6,7 @@ import javax.ejb.Remote;
 
 import ch.uzh.ejb.bank.entities.Account;
 import ch.uzh.ejb.bank.entities.Customer;
+import ch.uzh.ejb.bank.entities.Portfolio;
 import ch.uzh.ejb.bank.process.MortgageApplication;
 
 @Remote
@@ -54,6 +55,11 @@ public interface BankApplicationRemote {
 	//for mortgageprocess
 	public void payOutMortgage(MortgageApplication mortgageApplication) throws Exception;
 	public void updateCustomer(Customer customer);
-
 	
+	//portfolio mgmt
+	public Portfolio createPortfolio() throws Exception;
+	public Portfolio getCustomerPortfolio() throws Exception;
+	public void addShare(String symbol, long quantity, double purchasePrice) throws Exception;
+	public void removeShare(String symbol, long quantity) throws Exception;
+	public void transferShare(long buyerAccountId, String symbol, long quantity, double price) throws Exception;
 }
