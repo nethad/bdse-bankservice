@@ -49,6 +49,10 @@ public class Portfolio implements Serializable {
 		return portfolioId;
 	}
 
+	public void setCustomer(Customer customer) {
+		this.customer = customer;
+	}
+	
 	public Customer getCustomer() {
 		return customer;
 	}

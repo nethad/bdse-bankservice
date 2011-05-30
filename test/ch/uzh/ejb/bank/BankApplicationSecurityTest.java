@@ -6,10 +6,8 @@ import static org.junit.Assert.fail;
 import java.util.Date;
 
 import javax.ejb.EJBException;
-import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import org.jboss.security.auth.callback.UsernamePasswordHandler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +34,7 @@ public class BankApplicationSecurityTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
-	public void testInvalidUser() throws LoginException {
+	public void testInvalidUser() throws Exception {
 		logout();
 		login("notauser", "notapassword");
 		try {
@@ -61,7 +59,7 @@ public class BankApplicationSecurityTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
-	public void testCreateCustomer_inUserRole() {
+	public void testCreateCustomer_inUserRole() throws Exception {
 		loginAsUser();
 		try {
 			createCustomer("heinrich");

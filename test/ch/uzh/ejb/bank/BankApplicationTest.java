@@ -34,7 +34,7 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
-	public void testCreateAndGetCustomer() {
+	public void testCreateAndGetCustomer() throws Exception {
 		Customer customer = createCustomer("Hans", "Lustig");
 		assertNotNull(customer);
 		Customer customer2 = bankApplication.getCustomer(customer.getCustomerId());
@@ -215,11 +215,9 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	public void portfolioTest() throws Exception {
 		Customer customer = createCustomer("Fritz", "Freitag");
 		bankApplication.selectCustomer(customer.getCustomerId());
-		Portfolio portfolio = bankApplication.createPortfolio();
-		assertEquals(customer, portfolio.getCustomer());
+		Portfolio portfolio = bankApplication.getCustomerPortfolio();
 		assertTrue(0 == portfolio.getShares().size());
-		Portfolio portfolio2 = bankApplication.getCustomerPortfolio();
-		assertEquals(portfolio.getPortfolioId(), portfolio2.getPortfolioId());
+		assertEquals(customer, portfolio.getCustomer());
 	}
 	
 	@Test
@@ -227,12 +225,10 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 		Customer customer = createCustomer("Michael", "Mittwoch");
 		bankApplication.selectCustomer(customer.getCustomerId());
 		Account account = createAccount(1000.0);
-		bankApplication.createPortfolio();
 			
 		Customer customer2 = createCustomer("Donald", "Donnerstag");
 		bankApplication.selectCustomer(customer2.getCustomerId());
 		Account account2 = createAccount(1000.0);
-		bankApplication.createPortfolio();
 		bankApplication.addShare("APP", 100, 100.00);
 		Portfolio portfolio2 = bankApplication.getCustomerPortfolio();
 		assertTrue(portfolio2.getShares().size() == 1);

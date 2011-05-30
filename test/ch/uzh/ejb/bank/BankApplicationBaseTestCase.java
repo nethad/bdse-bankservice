@@ -7,7 +7,6 @@ import java.util.Properties;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
@@ -78,13 +77,14 @@ public abstract class BankApplicationBaseTestCase {
 	/**
 	 * Create a customer with given first and last name. 
 	 * The user name will the current timestamp and the password '1111'.
+	 * @throws Exception 
 	 */
-	Customer createCustomer(String firstName, String lastName) {
+	Customer createCustomer(String firstName, String lastName) throws Exception {
 		return bankApplication.createCustomer(Long.toHexString((new Date()).getTime()), "1111", 
 				firstName, lastName, "Lustiggasse 5, 9999 Lustigburg", Customer.Gender.MALE, "CH");
 	}
 	
-	Customer createCustomer(String userName) {
+	Customer createCustomer(String userName) throws Exception {
 		return bankApplication.createCustomer(userName, userName, 
 				userName, "lastname", "Lustiggasse 5, 9999 Lustigburg", Customer.Gender.MALE, "CH");
 	}

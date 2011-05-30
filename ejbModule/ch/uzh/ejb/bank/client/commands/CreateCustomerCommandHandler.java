@@ -18,7 +18,7 @@ public class CreateCustomerCommandHandler extends AbstractCommandHandler {
 			createCustomer(username, password);
 	}
 
-	private void createCustomer(String username, String password) {
+	private void createCustomer(String username, String password) throws Exception {
 		getBankApplication().createCustomer(
 				username, password, "Firstname", "Lastname", "", Gender.OTHER, "None");
 	}
