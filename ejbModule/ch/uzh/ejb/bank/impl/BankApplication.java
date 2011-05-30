@@ -278,7 +278,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 			break;
 		}
 		default: {
-			throw new IllegalArgumentException("Unknown status: " + status);
+			throw new Exception("Unknown status: " + status);
 		}
 		}
 		getManagedEntity(account).setAccountStatus(status);
@@ -371,8 +371,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		if (toAccount == null) {
 			throw new Exception("Target account does not exist.");
 		}
-		withdraw(this.selectedAccount, value);
-		deposit(toAccount, value);
+		transfer(selectedAccount, toAccount, value);
 	}
 	
 	<T> T getManagedEntity(T entity) {
@@ -411,7 +410,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	}
 	
 	boolean isLoggedInUserAccountOwnerOrClerkOrAdmin(Account account) {
-		if (context.isCallerInRole(ADMINISTRATOR_ROLE) || context.isCallerInRole("clerk")) {
+		if (context.isCallerInRole(ADMINISTRATOR_ROLE) || context.isCallerInRole(CLERK_ROLE)) {
 			return true;
 		}
 		
