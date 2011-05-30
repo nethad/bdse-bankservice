@@ -84,6 +84,22 @@ public class BankApplicationTest extends BankApplicationBaseTestCase {
 	}
 	
 	@Test
+	public void accountCustomerRelationshipTest() throws Exception {
+		Customer customer = createCustomer("Lena", "Luna");
+		Account account = createDefaultAccount(customer);
+		
+		Customer customerUpdated = bankApplication.getCustomer(customer.getCustomerId());
+		assertTrue(customerUpdated.getAccounts().contains(account));
+		assertEquals(account.getCustomer(), customer);
+		
+		Account account2 = createDefaultAccount(customer);
+		customerUpdated = bankApplication.getCustomer(customer.getCustomerId());
+		assertTrue(customerUpdated.getAccounts().contains(account2));
+		assertTrue(customerUpdated.getAccounts().contains(account));
+		assertEquals(account2.getCustomer(), customer);
+	}
+	
+	@Test
 	public void testWithdraw() throws Exception {
 		Customer customer = createCustomer("Hans", "Lustig");
 		Account account = createAccount(customer, 200.0);

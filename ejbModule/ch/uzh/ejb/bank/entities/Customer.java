@@ -1,13 +1,17 @@
 package ch.uzh.ejb.bank.entities;
 
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -43,10 +47,15 @@ public class Customer implements Serializable {
 	private String address;
 	private Gender gender;
 	private String nationality;
+	@OneToMany(mappedBy="customer", fetch=FetchType.EAGER)
+	private List<Account> accounts;
 	
-	public Customer() {}
+	public Customer() {
+		accounts = new LinkedList<Account>();
+	}
 
 	public Customer(String userName, String password, String firstName, String lastName, String address, Gender gender, String nationality) {
+		this();
 		this.userName = userName;
 		this.password = password;
 		this.firstName = firstName;
@@ -118,6 +127,10 @@ public class Customer implements Serializable {
 
 	public void setNationality(String nationality) {
 		this.nationality = nationality;
+	}
+	
+	public List<Account> getAccounts() {
+		return accounts;
 	}
 	
 	@Override

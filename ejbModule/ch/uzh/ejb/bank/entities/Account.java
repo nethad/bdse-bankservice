@@ -61,12 +61,11 @@ public class Account implements Serializable {
 	public Account() {}
 
 	public Account(double balance, Type accountType,
-			float interest, double creditLimit, Customer customer) {
+			float interest, double creditLimit) {
 		this.balance = balance;
 		this.accountType = accountType;
 		this.interest = interest;
 		this.creditLimit = creditLimit;
-		this.customer = customer;
 		this.accountStatus = Status.CLOSED;
 	}
 
@@ -115,13 +114,39 @@ public class Account implements Serializable {
 	}
 
 	public void setCustomer(Customer customer) {
+		if(this.customer instanceof Customer) {
+			this.customer.getAccounts().remove(this);
+		}
 		this.customer = customer;
+		if(!customer.getAccounts().contains(this)) {
+			customer.getAccounts().add(this);
+		}
 	}
+	
 	public Status getAccountStatus() {
 		return accountStatus;
 	}
 	
 	public void setAccountStatus(Status accountStatus) {
 		this.accountStatus = accountStatus;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == null) {
+			return false;
+		}
+		
+		if(obj instanceof Account) {
+			Account otherAccount = ((Account) obj);
+			return (accountId == otherAccount.accountId);
+		}
+		
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return String.valueOf(accountId).hashCode();
 	}
 }
