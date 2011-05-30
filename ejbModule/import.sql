@@ -5,3 +5,7 @@ insert into CUSTOMERS (customerId, userName, password, firstName, lastName, addr
 insert into USER_ROLES (userName, role) values ('admin', 'administrator');
 insert into USER_ROLES (userName, role) values ('clerk', 'clerk');
 insert into USER_ROLES (userName, role) values ('user', 'user');
+
+insert into PORTFOLIOS (portfolioId, customerId) values (1, 100);
+insert into PORTFOLIOS (portfolioId, customerId) values (2, 101);
+insert into PORTFOLIOS (portfolioId, customerId) values (3, 102);
