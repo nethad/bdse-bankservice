@@ -14,7 +14,7 @@ public interface BankApplicationRemote {
 	public void remove();
 	
 	public Customer createCustomer(String userName, String password, String firstName, String lastName, String address, 
-			Customer.Gender gender, String nationality);
+			Customer.Gender gender, String nationality) throws Exception;
 	public List<Customer> getCustomer(String firstName, String lastName);
 	public List<Customer> getAllCustomers();
 	public Customer getCustomer(long id);
@@ -57,7 +57,7 @@ public interface BankApplicationRemote {
 	public void updateCustomer(Customer customer);
 	
 	//portfolio mgmt
-	public Portfolio createPortfolio() throws Exception;
+//	public Portfolio createPortfolio() throws Exception;
 	public Portfolio getCustomerPortfolio() throws Exception;
 	public void addShare(String symbol, long quantity, double purchasePrice) throws Exception;
 	public void removeShare(String symbol, long quantity) throws Exception;

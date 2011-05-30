@@ -106,12 +106,14 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
 //	@PermitAll
 	public Customer createCustomer(String userName, String password, String firstName, String lastName,
-			String address, Customer.Gender gender, String nationality) {
+			String address, Customer.Gender gender, String nationality) throws Exception {
 		
 		password = Util.createPasswordHash("MD5", Util.BASE64_ENCODING, null, null, password);
 		
 		Customer customer = new Customer(userName, password, firstName, lastName, address, gender, nationality);
 		em.persist(customer);
+		
+		createPortfolio(customer);
 		
 		return customer;
 	}
@@ -571,13 +573,9 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		}
 	}
 
-	@Override
-	@RolesAllowed({ADMINISTRATOR_ROLE})
-	public Portfolio createPortfolio() throws Exception {
-		checkIfCustomerIsSelected();
-		Portfolio portfolio = new Portfolio(selectedCustomer);
+	void createPortfolio(Customer customer) throws Exception {
+		Portfolio portfolio = new Portfolio(customer);
 		em.persist(portfolio);
-		return portfolio;
 	}
 	
 	@Override
@@ -587,6 +585,7 @@ public class BankApplication implements BankApplicationRemote, BankApplicationLo
 		Query q = em.createNamedQuery("Portfolio.findByCustomer");
 		q.setParameter("customer", selectedCustomer);
 		Portfolio portfolio = (Portfolio) q.getSingleResult();
+		portfolio.setCustomer(selectedCustomer);
 		return portfolio;
 	}
 
