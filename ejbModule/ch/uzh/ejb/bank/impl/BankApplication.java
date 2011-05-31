@@ -30,6 +30,7 @@ import ch.uzh.ejb.bank.entities.FinancialTransaction;
 import ch.uzh.ejb.bank.entities.Account.Status;
 import ch.uzh.ejb.bank.entities.Mortgage;
 import ch.uzh.ejb.bank.entities.Portfolio;
+import ch.uzh.ejb.bank.entities.Role;
 import ch.uzh.ejb.bank.entities.Share;
 import ch.uzh.ejb.bank.impl.utils.AccountHistoryUtil;
 import ch.uzh.ejb.bank.process.MortgageApplication;
@@ -139,6 +140,7 @@ public class BankApplication implements BankApplicationRemote {
 
 	@Override
 	@RolesAllowed({ADMINISTRATOR_ROLE, CLERK_ROLE})
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public Customer createCustomer(String userName, String password, String firstName, String lastName,
 			String address, Customer.Gender gender, String nationality) throws Exception {
 		
@@ -146,6 +148,8 @@ public class BankApplication implements BankApplicationRemote {
 		
 		Customer customer = new Customer(userName, password, firstName, lastName, address, gender, nationality);
 		em.persist(customer);
+		Role role = new Role(userName, "user");
+		em.persist(role);
 		
 		createPortfolio(customer);
 		
